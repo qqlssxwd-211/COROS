@@ -10,6 +10,7 @@
     "deploy": "wrangler pages deploy dist"
   },
   "dependencies": {
+    "blueimp-md5": "^2.19.0",
     "echarts": "^5.5.0",
     "echarts-for-react": "^3.0.2",
     "lucide-react": "^0.400.0",
@@ -20,12 +21,12 @@
   "devDependencies": {
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.0",
     "vite": "^6.0.0",
-    "@vitejs/plugin-react": "^5.0.0",
     "wrangler": "^3.90.0"
   }
 }
