@@ -10,7 +10,7 @@ export const SPORT_MAP: Record<number, { name: string; type: SportType; color: s
   400: { name: '力量训练', type: 'strength', color: '#c084fc' },
 };
 
-export const SPORT_TYPE_LABELS: Record<string, string> = {
+export const SPORT_TYPE_LABELS: Record<SportType, string> = {
   all: '全部',
   running: '跑步',
   trailRunning: '越野跑',
@@ -30,8 +30,8 @@ export const REGION_OPTIONS = [
 export const REGION_BASE_URL: Record<string, string> = {
   cn: 'https://teamapi.coros.com',
   eu: 'https://teameuapi.coros.com',
-  us: 'https://teamapi.coros.com',
-  asia: 'https://teamapi.coros.com',
+  us: 'https://teamusapi.coros.com',
+  asia: 'https://teamapapi.coros.com',
 };
 
 export const INITIAL_MAP_VIEW = {

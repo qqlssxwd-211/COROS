@@ -1,14 +1,16 @@
+export type Region = 'cn' | 'eu' | 'us' | 'asia';
+
 export interface CorosCredentials {
   email: string;
   password: string;
-  region: 'cn' | 'eu' | 'us' | 'asia';
+  region: Region;
 }
 
 export interface AuthState {
   accessToken: string | null;
   userId: string | null;
   userName: string | null;
-  region: string;
+  region: Region;
   isLoggedIn: boolean;
 }
 
