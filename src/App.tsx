@@ -1,18 +1,28 @@
-import { useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginOverlay from './components/layout/LoginOverlay';
 import TerrainMap, { type TerrainMapHandle } from './components/background/TerrainMap';
+import NavBar from './components/layout/NavBar';
 
 function AppShell() {
   const { isLoggedIn } = useAuth();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [syncLoading, setSyncLoading] = useState(false);
   const mapRef = useRef<TerrainMapHandle>(null);
+
+  const handleSync = useCallback(async () => {
+    setSyncLoading(true);
+    await new Promise(r => setTimeout(r, 800));
+    setSyncLoading(false);
+  }, []);
+
   if (!isLoggedIn) return <LoginOverlay />;
+
   return (
     <>
       <TerrainMap ref={mapRef} />
-      <div className="h-screen w-screen relative z-10 flex items-center justify-center">
-        <p className="text-accent text-2xl">Dashboard - logged in</p>
-      </div>
+      <NavBar activeTab={activeTab} onTabChange={setActiveTab} onSync={handleSync}
+        syncLoading={syncLoading} mapRef={mapRef} />
     </>
   );
 }
