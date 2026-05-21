@@ -17,8 +17,10 @@ export default function LoginOverlay() {
     setError('');
     try {
       await login({ email, password, region });
-    } catch {
-      setError('登录失败，请检查邮箱、密码和地区');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '未知错误';
+      console.error('Login error:', msg);
+      setError(`登录失败：${msg}`);
     } finally {
       setLoading(false);
     }
@@ -36,19 +38,21 @@ export default function LoginOverlay() {
           <label className="block">
             <span className="text-[11px] uppercase tracking-[0.06em] text-[#666]">邮箱</span>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-sm text-white outline-none transition focus:border-accent"
+              className="mt-1 w-full rounded-xl border border-white/8 bg-white/[0.07] px-4 py-2.5 text-[0.9rem] text-white placeholder:text-[#555] outline-none transition focus:border-accent focus:bg-white/[0.10]"
+              style={{ WebkitTextFillColor: '#fafafa' }}
               placeholder="coros@example.com" required />
           </label>
           <label className="block">
             <span className="text-[11px] uppercase tracking-[0.06em] text-[#666]">密码</span>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-sm text-white outline-none transition focus:border-accent"
+              className="mt-1 w-full rounded-xl border border-white/8 bg-white/[0.07] px-4 py-2.5 text-[0.9rem] text-white placeholder:text-[#555] outline-none transition focus:border-accent focus:bg-white/[0.10]"
+              style={{ WebkitTextFillColor: '#fafafa' }}
               placeholder="••••••••" required />
           </label>
           <label className="block">
             <span className="text-[11px] uppercase tracking-[0.06em] text-[#666]">地区</span>
             <select value={region} onChange={e => setRegion(e.target.value as CorosCredentials['region'])}
-              className="mt-1 w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-sm text-white outline-none transition focus:border-accent">
+              className="mt-1 w-full rounded-xl border border-white/8 bg-white/[0.07] px-4 py-2.5 text-[0.9rem] text-white outline-none transition focus:border-accent focus:bg-white/[0.10]">
               {REGION_OPTIONS.map(o => <option key={o.value} value={o.value} className="bg-black">{o.label}</option>)}
             </select>
           </label>

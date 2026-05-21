@@ -97,8 +97,15 @@ function md5(input: string): string {
   return toHex(a) + toHex(b) + toHex(c) + toHex(d);
 }
 
+function getApiBase(region: string): string {
+  if (import.meta.env.DEV) {
+    return `/api/coros/${region}`;
+  }
+  return (REGION_BASE_URL as Record<string, string>)[region] ?? REGION_BASE_URL.cn;
+}
+
 export async function loginCoros(credentials: CorosCredentials): Promise<{ accessToken: string; userId: string }> {
-  const baseUrl = REGION_BASE_URL[credentials.region];
+  const baseUrl = getApiBase(credentials.region);
   const passwordHash = md5(credentials.password);
   const url = `${baseUrl}/api/v1/auth/login`;
   const res = await fetch(url, {
@@ -110,7 +117,10 @@ export async function loginCoros(credentials: CorosCredentials): Promise<{ acces
       accountType: 2,
     }),
   });
-  if (!res.ok) throw new Error(`Login failed: ${res.status}`);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Login failed: ${res.status} ${text}`);
+  }
   const data = await res.json();
   if (!data.accessToken || !data.userId) {
     throw new Error('Login response missing required fields');

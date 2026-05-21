@@ -2,9 +2,16 @@ import { useAuth } from '../context/AuthContext';
 import { REGION_BASE_URL } from '../lib/constants';
 import type { ActivitySummary, ActivityDetail, DailyRecord, SleepRecord } from '../types/coros';
 
+function getApiBase(region: string): string {
+  if (import.meta.env.DEV) {
+    return `/api/coros/${region}`;
+  }
+  return (REGION_BASE_URL as Record<string, string>)[region] ?? REGION_BASE_URL.cn;
+}
+
 export function useCorosApi() {
   const { accessToken, region } = useAuth();
-  const baseUrl = REGION_BASE_URL[region];
+  const baseUrl = getApiBase(region);
 
   async function fetchFromCoros<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     if (!accessToken) throw new Error('Not authenticated');
