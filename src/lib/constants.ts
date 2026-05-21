@@ -1,4 +1,4 @@
-import type { SportType } from '../types/coros';
+import type { Region, SportType } from '../types/coros';
 
 export const SPORT_MAP: Record<number, { name: string; type: SportType; color: string }> = {
   100: { name: '跑步', type: 'running', color: '#4ade80' },
@@ -27,7 +27,7 @@ export const REGION_OPTIONS = [
   { value: 'asia', label: '亚太' },
 ];
 
-export const REGION_BASE_URL: Record<string, string> = {
+export const REGION_BASE_URL: Record<Region, string> = {
   cn: 'https://teamapi.coros.com',
   eu: 'https://teameuapi.coros.com',
   us: 'https://teamusapi.coros.com',

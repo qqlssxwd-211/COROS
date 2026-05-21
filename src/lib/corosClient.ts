@@ -112,6 +112,9 @@ export async function loginCoros(credentials: CorosCredentials): Promise<{ acces
   });
   if (!res.ok) throw new Error(`Login failed: ${res.status}`);
   const data = await res.json();
+  if (!data.accessToken || !data.userId) {
+    throw new Error('Login response missing required fields');
+  }
   return { accessToken: data.accessToken, userId: data.userId };
 }
 
