@@ -1,4 +1,4 @@
-import { COROS_BASE_URLS } from '../_lib/coros';
+import { COROS_BASE_URLS } from '../lib/coros';
 
 export async function onRequestGet({ request }: { request: Request }) {
   const accessToken = request.headers.get('accessToken') ?? '';

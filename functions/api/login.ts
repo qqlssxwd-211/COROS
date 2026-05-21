@@ -1,4 +1,4 @@
-import { md5, COROS_BASE_URLS } from '../_lib/coros';
+import { md5, COROS_BASE_URLS } from '../lib/coros';
 
 export async function onRequestPost({ request }: { request: Request }) {
   const { email, password, region } = await request.json() as { email: string; password: string; region: string };
