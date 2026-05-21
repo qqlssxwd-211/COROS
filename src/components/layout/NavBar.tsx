@@ -29,7 +29,7 @@ export default function NavBar({ activeTab, onTabChange, onSync, syncLoading, ma
       <div className="flex items-center rounded-[28px] border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.92)] p-[3px] backdrop-blur-xl">
         {TABS.map(t => (
           <button key={t.id} onClick={() => onTabChange(t.id)}
-            className={`rounded-3xl px-[22px] py-2 text-[0.82rem] font-medium transition-colors tracking-[-0.01em] ${
+            className={`rounded-3xl px-[22px] py-2 text-[0.82rem] font-medium transition-colors tracking-[-0.01em] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-black ${
               activeTab === t.id ? 'bg-white/6 text-[#fafafa]' : 'text-[#666] hover:text-[#999]'
             }`}>
             {t.label}
@@ -43,7 +43,7 @@ export default function NavBar({ activeTab, onTabChange, onSync, syncLoading, ma
           轨迹视角
         </button>
         <button onClick={onSync} disabled={syncLoading}
-          className="rounded-3xl bg-accent px-5 py-2 text-[0.82rem] font-semibold text-black transition hover:bg-[#22c55e] disabled:opacity-50">
+          className="rounded-3xl bg-accent px-5 py-2 text-[0.82rem] font-semibold text-black transition hover:bg-accent-hover disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black">
           {syncLoading ? '同步中...' : '同步数据'}
         </button>
         <span className="rounded-[20px] border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.92)] px-3.5 py-1.5 text-[0.78rem] text-[#999] backdrop-blur-md">
