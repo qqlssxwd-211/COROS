@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COROS Dashboard</title>
+<style>
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('https://db.onlinewebfonts.com/c/dec0d9b4e22ca588dc20e1e2e09a59b5?family=Neue+Haas+Grotesk+Display+Pro+55+Roman') format('woff2');
+    font-weight: 400; font-style: normal;
+  }
+  @font-face {
+    font-family: 'Neue Haas Text';
+    src: url('https://db.onlinewebfonts.com/c/6e47ef470dd19698c911332a9b4d1cf4?family=Neue+Haas+Grotesk+Text+Pro') format('woff2');
+    font-weight: 400; font-style: normal;
+  }
+
+  :root {
+    --green-deepest: #1f2a1d;
+    --green-dark: #2d3a2a;
+    --green-hover: #2a3827;
+    --green-body: #4b5b47;
+    --green-heading: #336443;
+    --green-accent: #85AB8B;
+    --green-btn: #3d5638;
+    --green-btn-hover: #2d4228;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Neue Haas Display', 'Neue Haas Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #0a0c09;
+  }
+
+  /* ===== Video Background (simulated) ===== */
+  .video-bg {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden;
+  }
+  .video-bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .video-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(10,12,9,0.35) 0%,
+      rgba(21,25,19,0.15) 40%,
+      rgba(10,12,9,0.55) 75%,
+      rgba(10,12,9,0.85) 100%
+    );
+  }
+
+  /* ===== Top Nav (glassmorphic pill - exact reference style) ===== */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+  }
+  .nav-brand {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 1.05rem; font-weight: 500; letter-spacing: -0.02em;
+    color: #e8ebe4;
+  }
+  .nav-brand em { font-style: normal; color: var(--green-accent); }
+  .nav-pill {
+    display: flex; align-items: center;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    border-radius: 28px; padding: 3px;
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+  .nav-pill button {
+    padding: 8px 22px; border-radius: 24px;
+    font-size: 0.82rem; font-weight: 500; font-family: inherit;
+    color: var(--green-body); background: transparent; border: none;
+    cursor: pointer; transition: all 0.22s; letter-spacing: -0.01em;
+  }
+  .nav-pill button.active {
+    background: rgba(255,255,255,0.12);
+    color: #e8ebe4;
+  }
+  .nav-pill button:hover:not(.active) { color: #c0c8ba; }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .user-chip {
+    font-size: 0.78rem; color: var(--green-body);
+    padding: 7px 14px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+  }
+  .btn-sync {
+    background: var(--green-btn); color: #fff; border: none;
+    padding: 8px 20px; border-radius: 24px; font-size: 0.82rem;
+    font-weight: 500; cursor: pointer; font-family: inherit;
+    transition: background 0.2s;
+  }
+  .btn-sync:hover { background: var(--green-btn-hover); }
+
+  /* ===== Bottom-Left Hero Content ===== */
+  .hero {
+    position: fixed; left: 24px; bottom: 28px; z-index: 20;
+    max-width: 520px;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.80); margin-bottom: 14px;
+    font-size: 0.82rem; font-weight: 500;
+  }
+  .hero-tag svg { width: 16px; height: 16px; }
+  .hero-title {
+    font-size: 2.8rem; font-weight: 400; line-height: 0.95;
+    letter-spacing: -0.035em; color: var(--green-heading);
+    margin-bottom: 6px;
+  }
+  .hero-title em { font-style: normal; color: var(--green-accent); }
+  .hero-desc {
+    font-size: 0.88rem; color: var(--green-body);
+    line-height: 1.6; margin-bottom: 22px; max-width: 380px;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .hero-actions { display: flex; align-items: center; gap: 14px; }
+  .btn-hero {
+    background: rgba(255,255,255,0.10); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #e8ebe4; padding: 10px 22px; border-radius: 24px;
+    font-size: 0.85rem; font-weight: 500; cursor: pointer;
+    font-family: inherit; transition: all 0.2s;
+  }
+  .btn-hero:hover { background: rgba(255,255,255,0.16); }
+  .btn-hero.primary {
+    background: var(--green-btn); border-color: transparent; color: #fff;
+  }
+  .btn-hero.primary:hover { background: var(--green-btn-hover); }
+
+  /* ===== Right Stats Cards ===== */
+  .stats-panel {
+    position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+    z-index: 20; display: flex; flex-direction: column; gap: 8px;
+  }
+  .stat-mini {
+    background: rgba(255,255,255,0.05); backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 16px 20px; width: 160px;
+    transition: border-color 0.22s;
+  }
+  .stat-mini:hover { border-color: rgba(255,255,255,0.15); }
+  .stat-mini .sm-label {
+    font-size: 0.64rem; color: var(--green-body);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+    font-weight: 500; margin-bottom: 6px;
+  }
+  .stat-mini .sm-value {
+    font-size: 1.45rem; font-weight: 400; letter-spacing: -0.03em;
+    color: #e8ebe4;
+  }
+  .stat-mini .sm-unit {
+    font-size: 0.70rem; color: var(--green-body); margin-left: 2px;
+  }
+
+  /* ===== Recent Activity Rail (bottom-right) ===== */
+  .activity-rail {
+    position: fixed; right: 24px; bottom: 28px; z-index: 20;
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 260px; overflow-y: auto;
+  }
+  .act-chip {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.05); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 10px 14px; cursor: pointer;
+    transition: all 0.2s; min-width: 220px;
+  }
+  .act-chip:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
+  .act-chip .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-run { background: #85AB8B; }
+  .dot-hike { background: #a09070; }
+  .dot-bike { background: #6b8fa0; }
+  .dot-strength { background: #8b80a0; }
+  .act-chip .info { flex: 1; min-width: 0; }
+  .act-chip .name {
+    font-size: 0.80rem; font-weight: 500; letter-spacing: -0.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .act-chip .meta {
+    font-size: 0.68rem; color: var(--green-body);
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+    margin-top: 2px;
+  }
+  .act-chip .val {
+    font-size: 0.78rem; color: var(--green-body);
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+    white-space: nowrap;
+  }
+  .act-chip .val strong {
+    color: #e8ebe4; font-weight: 500;
+    font-family: 'Neue Haas Display', 'Helvetica Neue', sans-serif;
+  }
+
+  /* ===== Detail Overlay (slides up on activity click) ===== */
+  .detail-sheet {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; align-items: flex-end;
+    pointer-events: none;
+  }
+  .detail-sheet.active { pointer-events: auto; }
+  .detail-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(10,12,9,0.70); backdrop-filter: blur(8px);
+    opacity: 0; transition: opacity 0.35s;
+  }
+  .detail-sheet.active .detail-backdrop { opacity: 1; }
+  .detail-panel {
+    position: relative; z-index: 1;
+    width: 100%; max-height: 85vh; overflow-y: auto;
+    background: rgba(20,24,18,0.95); backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px 24px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    padding: 28px 32px 40px;
+  }
+  .detail-sheet.active .detail-panel { transform: translateY(0); }
+  .detail-handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.20);
+    margin: 0 auto 20px;
+  }
+  .detail-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+  }
+  .detail-header .title {
+    font-size: 1.25rem; font-weight: 500; letter-spacing: -0.02em;
+  }
+  .detail-header .sub {
+    font-size: 0.75rem; color: var(--green-body);
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+    margin-top: 3px;
+  }
+  .detail-metrics {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+    margin-bottom: 20px;
+  }
+  .dm-card {
+    text-align: center; padding: 16px 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px;
+  }
+  .dm-card .val {
+    font-size: 1.3rem; font-weight: 400; letter-spacing: -0.025em;
+  }
+  .dm-card .lbl {
+    font-size: 0.64rem; color: var(--green-body);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-top: 4px; font-weight: 500;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .detail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .detail-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .detail-card h4 {
+    font-size: 0.75rem; color: var(--green-body); font-weight: 500;
+    margin-bottom: 12px; font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .chart-placeholder {
+    height: 180px; background: rgba(255,255,255,0.02);
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; color: var(--green-body);
+    font-size: 0.72rem; border: 1px dashed rgba(255,255,255,0.05);
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .detail-table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .detail-table th {
+    text-align: left; padding: 10px 14px; color: var(--green-body);
+    font-weight: 500; font-size: 0.64rem; text-transform: uppercase;
+    letter-spacing: 0.06em; border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .detail-table td {
+    padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: var(--green-body); font-size: 0.75rem;
+  }
+  .detail-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .detail-summary {
+    margin-top: 16px; padding: 16px 20px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 14px; font-size: 0.78rem;
+    color: var(--green-body); line-height: 1.7;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .detail-summary strong { color: var(--green-accent); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<!-- ===== Video Background ===== -->
+<div class="video-bg">
+  <canvas id="bgCanvas"></canvas>
+  <div class="video-overlay"></div>
+</div>
+
+<!-- ===== Top Nav ===== -->
+<nav class="nav">
+  <div class="nav-brand">COROS <em>Dashboard</em></div>
+  <div class="nav-pill">
+    <button class="active">概览</button>
+    <button>趋势</button>
+    <button>身体</button>
+    <button>睡眠</button>
+    <button>活动</button>
+  </div>
+  <div class="nav-actions">
+    <span class="user-chip">maqiang@coros</span>
+    <button class="btn-sync" onclick="alert('同步数据: 调用 COROS API 获取最新运动数据')">同步数据</button>
+  </div>
+</nav>
+
+<!-- ===== Bottom-Left Hero ===== -->
+<div class="hero">
+  <div class="hero-tag">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/></svg>
+    <span>今日摘要 · 5月21日</span>
+  </div>
+  <div class="hero-title">
+    你的运动<br><em>全貌一览</em>
+  </div>
+  <p class="hero-desc">
+    基于 COROS 训练数据，追踪运动表现、身体状态与训练趋势。
+    点击活动查看每一次训练的深度分析。
+  </p>
+  <div class="hero-actions">
+    <button class="btn-hero primary" onclick="document.getElementById('detailSheet').classList.add('active')">查看示例详情</button>
+    <button class="btn-hero">筛选活动</button>
+  </div>
+</div>
+
+<!-- ===== Right Stats Panel ===== -->
+<div class="stats-panel">
+  <div class="stat-mini">
+    <div class="sm-label">总活动</div>
+    <div class="sm-value">186<span class="sm-unit">次</span></div>
+  </div>
+  <div class="stat-mini">
+    <div class="sm-label">总距离</div>
+    <div class="sm-value">1,250<span class="sm-unit">km</span></div>
+  </div>
+  <div class="stat-mini">
+    <div class="sm-label">总时长</div>
+    <div class="sm-value">142<span class="sm-unit">h</span></div>
+  </div>
+  <div class="stat-mini">
+    <div class="sm-label">总消耗</div>
+    <div class="sm-value">82.3k<span class="sm-unit">kcal</span></div>
+  </div>
+</div>
+
+<!-- ===== Bottom-Right Activity Rail ===== -->
+<div class="activity-rail">
+  <div class="act-chip" onclick="document.getElementById('detailSheet').classList.add('active')">
+    <div class="dot dot-hike"></div>
+    <div class="info"><div class="name">周末登山 · 凤凰岭</div><div class="meta">5月18日 · 3h 12min</div></div>
+    <div class="val"><strong>12.5</strong> km</div>
+  </div>
+  <div class="act-chip" onclick="document.getElementById('detailSheet').classList.add('active')">
+    <div class="dot dot-run"></div>
+    <div class="info"><div class="name">晨跑 10K</div><div class="meta">5月17日 · 52min</div></div>
+    <div class="val"><strong>10.2</strong> km</div>
+  </div>
+  <div class="act-chip" onclick="document.getElementById('detailSheet').classList.add('active')">
+    <div class="dot dot-bike"></div>
+    <div class="info"><div class="name">夜骑三环</div><div class="meta">5月16日 · 1h 45min</div></div>
+    <div class="val"><strong>42.3</strong> km</div>
+  </div>
+  <div class="act-chip" onclick="document.getElementById('detailSheet').classList.add('active')">
+    <div class="dot dot-strength"></div>
+    <div class="info"><div class="name">力量训练</div><div class="meta">5月15日 · 45min</div></div>
+    <div class="val"><strong>320</strong> kcal</div>
+  </div>
+</div>
+
+<!-- ===== Detail Bottom Sheet ===== -->
+<div id="detailSheet" class="detail-sheet" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="detail-backdrop"></div>
+  <div class="detail-panel">
+    <div class="detail-handle" style="cursor:pointer" onclick="document.getElementById('detailSheet').classList.remove('active')"></div>
+
+    <div class="detail-header">
+      <div class="dot dot-hike" style="width:11px;height:11px;"></div>
+      <div>
+        <div class="title">周末登山 · 凤凰岭</div>
+        <div class="sub">2026年5月18日 08:30 — 11:42 · 登山</div>
+      </div>
+    </div>
+
+    <div class="detail-metrics">
+      <div class="dm-card"><div class="val">12.50<span style="font-size:0.7rem;color:var(--green-body)"> km</span></div><div class="lbl">距离</div></div>
+      <div class="dm-card"><div class="val">3:12:05</div><div class="lbl">时长</div></div>
+      <div class="dm-card"><div class="val">860<span style="font-size:0.7rem;color:var(--green-body)"> m</span></div><div class="lbl">爬升</div></div>
+      <div class="dm-card"><div class="val">135<span style="font-size:0.7rem;color:var(--green-body)"> bpm</span></div><div class="lbl">平均心率</div></div>
+      <div class="dm-card"><div class="val">780<span style="font-size:0.7rem;color:var(--green-body)"> kcal</span></div><div class="lbl">卡路里</div></div>
+      <div class="dm-card"><div class="val">72</div><div class="lbl">训练负荷</div></div>
+    </div>
+
+    <div class="detail-row">
+      <div class="detail-card"><h4>配速 & 海拔曲线</h4><div class="chart-placeholder">双Y轴折线图</div></div>
+      <div class="detail-card"><h4>心率区间分布</h4><div class="chart-placeholder">环形占比图</div></div>
+    </div>
+
+    <div class="detail-card" style="margin-bottom:14px;">
+      <h4>分段数据</h4>
+      <div style="overflow-x:auto;">
+        <table class="detail-table">
+          <thead><tr><th>#</th><th>距离 (km)</th><th>时长</th><th>配速</th><th>心率</th><th>步频</th><th>爬升 (m)</th><th>卡路里</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>3.2</td><td>42:15</td><td>13:12</td><td>128</td><td>98</td><td>210</td><td>195</td></tr>
+            <tr><td>2</td><td>4.1</td><td>1:05:30</td><td>15:58</td><td>142</td><td>85</td><td>480</td><td>350</td></tr>
+            <tr><td>3</td><td>3.8</td><td>55:20</td><td>14:34</td><td>136</td><td>95</td><td>140</td><td>170</td></tr>
+            <tr><td>4</td><td>1.4</td><td>9:00</td><td>6:25</td><td>118</td><td>155</td><td>30</td><td>65</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="detail-summary">
+      <strong>运动小结</strong><br>
+      全程 12.5km，累计爬升 860m，用时 3 小时 12 分。平均心率 135bpm，处于有氧耐力区间，训练负荷 72。爬升主要集中在第 2 分段（4.1km 爬升 480m，坡度 11.7%），最终 1.4km 下坡恢复。
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Animated background particles (simulating HLS video) =====
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const particles = [];
+const PARTICLE_COUNT = 60;
+const COLORS = [
+  'rgba(133,171,139,0.06)',
+  'rgba(51,100,67,0.05)',
+  'rgba(61,86,56,0.07)',
+  'rgba(75,91,71,0.04)',
+];
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.r = Math.random() * 120 + 60;
+    this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.dx = (Math.random() - 0.5) * 0.15;
+    this.dy = (Math.random() - 0.5) * 0.12;
+    this.opacity = Math.random() * 0.5 + 0.3;
+  }
+  update() {
+    this.x += this.dx;
+    this.y += this.dy;
+    if (this.x < -this.r) this.x = canvas.width + this.r;
+    if (this.x > canvas.width + this.r) this.x = -this.r;
+    if (this.y < -this.r) this.y = canvas.height + this.r;
+    if (this.y > canvas.height + this.r) this.y = -this.r;
+  }
+  draw(ctx) {
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r);
+    gradient.addColorStop(0, this.color);
+    gradient.addColorStop(0.5, this.color.replace(/[\d.]+\)$/, '0.02)'));
+    gradient.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particles.push(new Particle());
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const p of particles) {
+    p.update();
+    p.draw(ctx);
+  }
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>

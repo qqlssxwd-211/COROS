@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COROS Dashboard</title>
+<style>
+  /* ===== Fonts (same as reference) ===== */
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('https://db.onlinewebfonts.com/c/dec0d9b4e22ca588dc20e1e2e09a59b5?family=Neue+Haas+Grotesk+Display+Pro+55+Roman') format('woff2');
+    font-weight: 400; font-style: normal;
+  }
+  @font-face {
+    font-family: 'Neue Haas Text';
+    src: url('https://db.onlinewebfonts.com/c/6e47ef470dd19698c911332a9b4d1cf4?family=Neue+Haas+Grotesk+Text+Pro') format('woff2');
+    font-weight: 400; font-style: normal;
+  }
+
+  :root {
+    --green-deepest: #1f2a1d;
+    --green-dark: #2d3a2a;
+    --green-hover: #2a3827;
+    --green-body: #4b5b47;
+    --green-heading: #336443;
+    --green-accent: #85AB8B;
+    --green-btn: #3d5638;
+    --green-btn-hover: #2d4228;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Neue Haas Display', 'Neue Haas Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #0c0d0a;
+    color: #e8ebe4;
+  }
+
+  /* ===== Layout ===== */
+  .app { min-height: 100vh; position: relative; }
+
+  /* ===== Top Nav (glass pill - same as reference) ===== */
+  .top-nav {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+  }
+  .nav-brand {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--green-accent);
+  }
+  .nav-brand span {
+    font-size: 1.05rem; font-weight: 500; letter-spacing: -0.02em;
+    color: #e8ebe4;
+  }
+  .nav-brand span em { font-style: normal; color: var(--green-accent); }
+  .nav-pill {
+    display: flex; align-items: center; gap: 0;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(16px);
+    border-radius: 28px;
+    padding: 3px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-pill button {
+    padding: 8px 22px; border-radius: 24px;
+    font-size: 0.82rem; font-weight: 500;
+    color: var(--green-body); background: transparent; border: none;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.22s; letter-spacing: -0.01em;
+  }
+  .nav-pill button.active {
+    background: rgba(255,255,255,0.10);
+    color: #e8ebe4;
+  }
+  .nav-pill button:hover:not(.active) { color: #c0c8ba; }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .user-chip {
+    font-size: 0.78rem; color: var(--green-body);
+    padding: 7px 14px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+  }
+  .btn-sync {
+    background: var(--green-btn); color: #fff;
+    border: none; padding: 8px 20px; border-radius: 24px;
+    font-size: 0.82rem; font-weight: 500; cursor: pointer;
+    font-family: inherit; transition: background 0.2s;
+  }
+  .btn-sync:hover { background: var(--green-btn-hover); }
+
+  /* ===== Main content area ===== */
+  .main-content {
+    max-width: 1280px; margin: 0 auto;
+    padding: 8px 24px 48px;
+  }
+
+  /* ===== Stats row (4-up, like reference spacing) ===== */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin-bottom: 14px;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 22px 24px;
+    backdrop-filter: blur(8px);
+    transition: border-color 0.22s;
+  }
+  .stat-card:hover { border-color: rgba(255,255,255,0.12); }
+  .stat-label {
+    font-size: 0.66rem; color: var(--green-body);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 8px; font-weight: 500;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .stat-value {
+    font-size: 1.85rem; font-weight: 400; letter-spacing: -0.03em;
+    color: #e8ebe4;
+  }
+  .stat-unit {
+    font-size: 0.76rem; color: var(--green-body);
+    margin-left: 4px; font-weight: 400;
+  }
+
+  /* ===== Grid ===== */
+  .content-grid { display: grid; gap: 10px; margin-bottom: 14px; }
+  .grid-chart-list { grid-template-columns: 1fr 1.8fr; }
+
+  /* ===== Glass card ===== */
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; overflow: hidden;
+    backdrop-filter: blur(8px);
+  }
+  .card-header {
+    padding: 15px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.78rem; font-weight: 500;
+    color: var(--green-body);
+    letter-spacing: -0.01em;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .card-body { padding: 20px 22px; }
+  .card-body-flush { padding: 0; }
+
+  /* ===== Chart placeholders ===== */
+  .chart-ph {
+    width: 100%; height: 240px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px; display: flex; align-items: center;
+    justify-content: center; color: var(--green-body);
+    font-size: 0.76rem; border: 1px dashed rgba(255,255,255,0.05);
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+
+  /* ===== Activity rows ===== */
+  .act-row {
+    display: flex; align-items: center; padding: 13px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    gap: 14px; cursor: pointer;
+    transition: background 0.18s;
+  }
+  .act-row:hover { background: rgba(255,255,255,0.03); }
+  .act-row:last-child { border-bottom: none; }
+  .act-dot {
+    width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-run { background: #85AB8B; }
+  .dot-hike { background: #a09070; }
+  .dot-bike { background: #6b8fa0; }
+  .dot-strength { background: #8b80a0; }
+  .act-info { flex: 1; min-width: 0; }
+  .act-name {
+    font-size: 0.85rem; font-weight: 500; letter-spacing: -0.01em;
+  }
+  .act-meta {
+    font-size: 0.72rem; color: var(--green-body);
+    margin-top: 3px; font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .act-stat {
+    text-align: right; font-size: 0.78rem; color: var(--green-body);
+    white-space: nowrap; font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .act-stat strong {
+    color: #e8ebe4; font-weight: 500;
+    font-family: 'Neue Haas Display', 'Helvetica Neue', sans-serif;
+  }
+
+  /* ===== Activity Detail ===== */
+  .detail-back {
+    color: var(--green-accent); cursor: pointer;
+    font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px;
+    transition: opacity 0.2s;
+  }
+  .detail-back:hover { opacity: 0.75; }
+  .detail-hero {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 8px; margin-bottom: 16px;
+  }
+  .dm {
+    text-align: center;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px; padding: 18px 12px;
+  }
+  .dm-value {
+    font-size: 1.35rem; font-weight: 400; letter-spacing: -0.025em;
+  }
+  .dm-label {
+    font-size: 0.66rem; color: var(--green-body);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-top: 4px; font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+    font-weight: 500;
+  }
+  .dm-unit { font-size: 0.7rem; color: var(--green-body); }
+
+  /* ===== Table ===== */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left; padding: 11px 16px; color: var(--green-body);
+    font-weight: 500; font-size: 0.67rem; text-transform: uppercase;
+    letter-spacing: 0.06em; border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .data-table td {
+    padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: var(--green-body); font-size: 0.77rem;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ===== Summary block ===== */
+  .summary {
+    margin-top: 16px; padding: 18px 22px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px; font-size: 0.80rem;
+    color: var(--green-body); line-height: 1.75;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+  }
+  .summary strong { color: var(--green-accent); font-weight: 500; }
+
+  /* ===== Filter row ===== */
+  .filter-row {
+    display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+  }
+  .filter-row .fld { display: flex; flex-direction: column; gap: 4px; }
+  .filter-row .fld label {
+    font-size: 0.66rem; color: var(--green-body);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif; font-weight: 500;
+  }
+  .filter-row .fld input, .filter-row .fld select {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    color: #e8ebe4; padding: 8px 14px; border-radius: 10px;
+    font-size: 0.80rem; font-family: inherit; min-width: 115px;
+    transition: border-color 0.2s;
+  }
+  .filter-row .fld input:focus, .filter-row .fld select:focus {
+    outline: none; border-color: var(--green-accent);
+  }
+  .btn-ghost {
+    background: transparent; border: 1px solid rgba(255,255,255,0.10);
+    color: var(--green-body); padding: 8px 20px; border-radius: 22px;
+    font-size: 0.80rem; cursor: pointer; font-family: inherit;
+    transition: all 0.2s; font-weight: 500;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.20); color: #c0c8ba; }
+
+  /* ===== Section label ===== */
+  .sec-label {
+    font-size: 0.66rem; color: var(--green-body);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 32px 0 14px; font-family: 'Neue Haas Text', 'Helvetica Neue', sans-serif;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top Nav -->
+  <div class="top-nav">
+    <div class="nav-brand">
+      <span>COROS <em>Dashboard</em></span>
+    </div>
+    <div class="nav-pill">
+      <button class="active">概览</button>
+      <button>趋势</button>
+      <button>身体</button>
+      <button>睡眠</button>
+      <button>活动</button>
+    </div>
+    <div class="nav-actions">
+      <span class="user-chip">maqiang@coros</span>
+      <button class="btn-sync">同步数据</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-content">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">总活动次数</div>
+        <div class="stat-value">186<span class="stat-unit">次</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">总距离</div>
+        <div class="stat-value">1,250<span class="stat-unit">km</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">总时长</div>
+        <div class="stat-value">142<span class="stat-unit">h</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">总消耗</div>
+        <div class="stat-value">82.3k<span class="stat-unit">kcal</span></div>
+      </div>
+    </div>
+
+    <!-- Overview: chart + activity list -->
+    <div class="content-grid grid-chart-list">
+      <div class="card">
+        <div class="card-header">运动类型</div>
+        <div class="card-body"><div class="chart-ph">ECharts 饼图</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">最近活动 <span style="font-weight:400;font-size:0.68rem;color:var(--green-body);">查看全部 →</span></div>
+        <div class="card-body-flush">
+          <div class="act-row">
+            <div class="act-dot dot-hike"></div>
+            <div class="act-info"><div class="act-name">周末登山 · 凤凰岭</div><div class="act-meta">5月18日 · 3h 12min</div></div>
+            <div class="act-stat"><strong>12.5</strong> km</div>
+            <div class="act-stat">↗ <strong>860</strong> m</div>
+            <div class="act-stat">♥ <strong>135</strong></div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot dot-run"></div>
+            <div class="act-info"><div class="act-name">晨跑 10K</div><div class="act-meta">5月17日 · 52min</div></div>
+            <div class="act-stat"><strong>10.2</strong> km</div>
+            <div class="act-stat">⚡ <strong>5:06</strong></div>
+            <div class="act-stat">♥ <strong>148</strong></div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot dot-bike"></div>
+            <div class="act-info"><div class="act-name">夜骑三环</div><div class="act-meta">5月16日 · 1h 45min</div></div>
+            <div class="act-stat"><strong>42.3</strong> km</div>
+            <div class="act-stat">⚡ <strong>24.2</strong></div>
+            <div class="act-stat">♥ <strong>128</strong></div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot dot-strength"></div>
+            <div class="act-info"><div class="act-name">力量训练</div><div class="act-meta">5月15日 · 45min</div></div>
+            <div class="act-stat">🔥 <strong>320</strong> kcal</div>
+            <div class="act-stat">—</div>
+            <div class="act-stat">♥ <strong>110</strong></div>
+          </div>
+          <div class="act-row">
+            <div class="act-dot dot-run"></div>
+            <div class="act-info"><div class="act-name">间歇跑训练</div><div class="act-meta">5月14日 · 1h 05min</div></div>
+            <div class="act-stat"><strong>8.5</strong> km</div>
+            <div class="act-stat">⚡ <strong>4:38</strong></div>
+            <div class="act-stat">♥ <strong>158</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Detail Mockup -->
+    <div class="sec-label">活动详情视图</div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="detail-back">← 返回列表</span>
+        <span style="font-size:0.70rem;">ID 123456789</span>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+          <div class="act-dot dot-hike" style="width:11px;height:11px;"></div>
+          <div>
+            <div style="font-size:1.1rem;font-weight:500;letter-spacing:-0.02em;">周末登山 · 凤凰岭</div>
+            <div style="font-size:0.73rem;color:var(--green-body);margin-top:3px;font-family:'Neue Haas Text','Helvetica Neue',sans-serif;">2026年5月18日 08:30 — 11:42 · 登山</div>
+          </div>
+        </div>
+
+        <div class="detail-hero">
+          <div class="dm"><div class="dm-value">12.50<span class="dm-unit"> km</span></div><div class="dm-label">距离</div></div>
+          <div class="dm"><div class="dm-value">3:12:05</div><div class="dm-label">时长</div></div>
+          <div class="dm"><div class="dm-value">860<span class="dm-unit"> m</span></div><div class="dm-label">爬升</div></div>
+          <div class="dm"><div class="dm-value">135<span class="dm-unit"> bpm</span></div><div class="dm-label">平均心率</div></div>
+          <div class="dm"><div class="dm-value">780<span class="dm-unit"> kcal</span></div><div class="dm-label">卡路里</div></div>
+          <div class="dm"><div class="dm-value">72</div><div class="dm-label">训练负荷</div></div>
+        </div>
+
+        <div class="content-grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px;">
+          <div class="card"><div class="card-header">配速 & 海拔曲线</div><div class="card-body"><div class="chart-ph" style="height:200px;">双Y轴折线图</div></div></div>
+          <div class="card"><div class="card-header">心率区间分布</div><div class="card-body"><div class="chart-ph" style="height:200px;">环形占比图</div></div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-header">分段数据</div>
+          <div class="card-body-flush" style="overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>距离 (km)</th><th>时长</th><th>配速</th><th>心率</th><th>步频</th><th>爬升 (m)</th><th>卡路里</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>3.2</td><td>42:15</td><td>13:12</td><td>128</td><td>98</td><td>210</td><td>195</td></tr>
+                <tr><td>2</td><td>4.1</td><td>1:05:30</td><td>15:58</td><td>142</td><td>85</td><td>480</td><td>350</td></tr>
+                <tr><td>3</td><td>3.8</td><td>55:20</td><td>14:34</td><td>136</td><td>95</td><td>140</td><td>170</td></tr>
+                <tr><td>4</td><td>1.4</td><td>9:00</td><td>6:25</td><td>118</td><td>155</td><td>30</td><td>65</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="summary">
+          <strong>运动小结</strong><br>
+          全程 12.5km，累计爬升 860m，用时 3 小时 12 分。平均心率 135bpm，处于有氧耐力区间，训练负荷 72。爬升集中在第 2 分段（4.1km 爬升 480m，坡度 11.7%），最终 1.4km 下坡恢复。
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="sec-label">活动筛选</div>
+    <div class="card">
+      <div class="card-header">筛选条件</div>
+      <div class="card-body">
+        <div class="filter-row">
+          <div class="fld"><label>类型</label><select><option>全部</option><option>登山</option><option>跑步</option><option>骑行</option><option>力量训练</option></select></div>
+          <div class="fld"><label>开始</label><input type="date"></div>
+          <div class="fld"><label>结束</label><input type="date"></div>
+          <div class="fld"><label>排序</label><select><option>时间降序</option><option>距离降序</option><option>时长降序</option></select></div>
+          <button class="btn-ghost">筛选</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

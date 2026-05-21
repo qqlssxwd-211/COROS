@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COROS Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<style>
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('https://db.onlinewebfonts.com/c/dec0d9b4e22ca588dc20e1e2e09a59b5?family=Neue+Haas+Grotesk+Display+Pro+55+Roman') format('woff2');
+  }
+  @font-face {
+    font-family: 'Neue Haas Text';
+    src: url('https://db.onlinewebfonts.com/c/6e47ef470dd19698c911332a9b4d1cf4?family=Neue+Haas+Grotesk+Text+Pro') format('woff2');
+  }
+  :root {
+    --green: #4ade80;
+    --green-bright: #86efac;
+    --green-glow: #22c55e;
+    --green-btn: #16a34a;
+    --green-btn-hover: #22c55e;
+    --text-muted: #86a08a;
+    --surface: rgba(8,14,10,0.90);
+    --border: rgba(255,255,255,0.08);
+    --radius: 14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Neue Haas Display', 'Neue Haas Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; background: #040805; color: #f0fdf4;
+  }
+  #bgCanvas { position: fixed; inset: 0; z-index: 0; }
+  .vignette {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(4,8,5,0.10) 0%, transparent 35%, transparent 65%, rgba(4,8,5,0.55) 100%);
+  }
+
+  /* Nav */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+  }
+  .nav-brand { font-size: 1.05rem; font-weight: 500; letter-spacing: -0.02em; }
+  .nav-brand em { font-style: normal; color: var(--green); }
+  .nav-pill {
+    display: flex; align-items: center;
+    background: rgba(0,0,0,0.50); backdrop-filter: blur(20px);
+    border-radius: 28px; padding: 3px; border: 1px solid rgba(255,255,255,0.10);
+  }
+  .nav-pill button {
+    padding: 8px 22px; border-radius: 24px; font-size: 0.82rem; font-weight: 500;
+    font-family: inherit; color: var(--text-muted); background: transparent;
+    border: none; cursor: pointer; transition: all 0.22s; letter-spacing: -0.01em;
+  }
+  .nav-pill button.active { background: rgba(255,255,255,0.12); color: #f0fdf4; }
+  .nav-pill button:hover:not(.active) { color: var(--green-bright); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .user-chip {
+    font-size: 0.78rem; color: var(--text-muted); padding: 7px 14px;
+    border-radius: 20px; border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.40); backdrop-filter: blur(12px);
+  }
+  .btn-sync {
+    background: var(--green-btn); color: #fff; border: none;
+    padding: 8px 20px; border-radius: 24px; font-size: 0.82rem;
+    font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.2s;
+  }
+  .btn-sync:hover { background: var(--green-btn-hover); }
+
+  /* Hero - left bottom */
+  .hero {
+    position: fixed; left: 28px; bottom: 32px; z-index: 20; max-width: 460px;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--green-bright); margin-bottom: 10px; font-size: 0.80rem; font-weight: 500;
+  }
+  .hero-title {
+    font-size: 2.5rem; font-weight: 400; line-height: 0.95;
+    letter-spacing: -0.035em; color: #f0fdf4; margin-bottom: 6px;
+  }
+  .hero-title em { font-style: normal; color: var(--green); }
+  .hero-desc {
+    font-size: 0.83rem; color: var(--text-muted); line-height: 1.6;
+    margin-bottom: 18px; max-width: 340px;
+    font-family: 'Neue Haas Text','Helvetica Neue',sans-serif;
+  }
+
+  /* Stats - right */
+  .stats-panel {
+    position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+    z-index: 20; display: flex; flex-direction: column; gap: 8px;
+  }
+  .stat-mini {
+    background: rgba(0,0,0,0.50); backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 15px 20px; width: 165px; transition: border-color 0.22s;
+  }
+  .stat-mini:hover { border-color: rgba(74,222,128,0.25); }
+  .stat-mini .sm-label {
+    font-size: 0.64rem; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.06em; font-family: 'Neue Haas Text','Helvetica Neue',sans-serif;
+    font-weight: 500; margin-bottom: 6px;
+  }
+  .stat-mini .sm-value { font-size: 1.5rem; font-weight: 400; letter-spacing: -0.03em; color: #f0fdf4; }
+  .stat-mini .sm-unit { font-size: 0.70rem; color: var(--text-muted); margin-left: 2px; }
+
+  /* Activity rail - right bottom */
+  .activity-rail {
+    position: fixed; right: 24px; bottom: 32px; z-index: 20;
+    display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto;
+  }
+  .act-chip {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,0.50); backdrop-filter: blur(12px);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 14px; cursor: pointer; transition: all 0.2s; min-width: 225px;
+  }
+  .act-chip:hover { background: rgba(0,0,0,0.65); border-color: rgba(74,222,128,0.20); }
+  .act-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-run { background: #4ade80; } .dot-hike { background: #facc15; }
+  .dot-bike { background: #38bdf8; } .dot-strength { background: #c084fc; }
+  .dot-swim { background: #34d399; }
+  .act-chip .info { flex: 1; min-width: 0; }
+  .act-chip .name { font-size: 0.80rem; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .act-chip .meta { font-size: 0.68rem; color: var(--text-muted); font-family: 'Neue Haas Text','Helvetica Neue',sans-serif; margin-top: 2px; }
+  .act-chip .val { font-size: 0.78rem; color: var(--text-muted); font-family: 'Neue Haas Text','Helvetica Neue',sans-serif; white-space: nowrap; }
+  .act-chip .val strong { color: #f0fdf4; font-weight: 500; font-family: 'Neue Haas Display','Helvetica Neue',sans-serif; }
+
+  /* ===== FLYOUT PANELS for each tab ===== */
+  .tab-panel {
+    position: fixed; inset: 0; z-index: 40; pointer-events: none;
+    display: flex; align-items: flex-end;
+  }
+  .tab-panel.active { pointer-events: auto; }
+  .tab-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(4,8,5,0.70); backdrop-filter: blur(6px);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .tab-panel.active .tab-backdrop { opacity: 1; }
+  .tab-content {
+    position: relative; z-index: 1;
+    width: 100%; max-height: 82vh; overflow-y: auto;
+    background: rgba(6,12,8,0.96); backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(74,222,128,0.12);
+    border-radius: 24px 24px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    padding: 28px 36px 40px;
+  }
+  .tab-panel.active .tab-content { transform: translateY(0); }
+  .tab-handle { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.25); margin: 0 auto 22px; cursor: pointer; }
+  .tab-content h3 {
+    font-size: 1.2rem; font-weight: 500; letter-spacing: -0.02em;
+    margin-bottom: 20px; color: var(--green);
+  }
+
+  /* Metric grid */
+  .metric-row {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;
+  }
+  .metric-row.col3 { grid-template-columns: repeat(3, 1fr); }
+  .metric-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius); padding: 18px 20px;
+  }
+  .metric-card h4 {
+    font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.05em; font-family: 'Neue Haas Text','Helvetica Neue',sans-serif;
+    font-weight: 500; margin-bottom: 14px;
+  }
+  .chart-box {
+    width: 100%; height: 200px;
+    background: rgba(0,0,0,0.20); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 0.74rem;
+    border: 1px dashed rgba(255,255,255,0.06);
+    font-family: 'Neue Haas Text','Helvetica Neue',sans-serif;
+  }
+
+  /* Full data table */
+  .data-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 14px;
+  }
+  .data-card h4 {
+    font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.05em; font-family: 'Neue Haas Text','Helvetica Neue',sans-serif;
+    font-weight: 500; padding: 16px 20px 12px;
+  }
+  .data-table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'Neue Haas Text','Helvetica Neue',sans-serif;
+  }
+  .data-table th {
+    text-align: left; padding: 10px 16px; color: var(--text-muted);
+    font-weight: 500; font-size: 0.64rem; text-transform: uppercase;
+    letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.20);
+  }
+  .data-table td {
+    padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: #c0d6c4; font-size: 0.76rem;
+  }
+  .data-table tr:hover td { background: rgba(74,222,128,0.04); }
+  .data-table .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 0.68rem; font-weight: 500;
+  }
+  .badge-run { background: rgba(74,222,128,0.15); color: #4ade80; }
+  .badge-hike { background: rgba(250,204,21,0.15); color: #facc15; }
+  .badge-bike { background: rgba(56,189,248,0.15); color: #38bdf8; }
+  .badge-strength { background: rgba(192,132,252,0.15); color: #c084fc; }
+  .badge-swim { background: rgba(52,211,153,0.15); color: #34d399; }
+
+  /* Filter bar inside panel */
+  .filter-inline {
+    display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .filter-inline .fld { display: flex; flex-direction: column; gap: 4px; }
+  .filter-inline .fld label {
+    font-size: 0.64rem; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.05em; font-family: 'Neue Haas Text','Helvetica Neue',sans-serif; font-weight: 500;
+  }
+  .filter-inline .fld select, .filter-inline .fld input {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+    color: #f0fdf4; padding: 8px 14px; border-radius: 10px;
+    font-size: 0.78rem; font-family: inherit; min-width: 120px;
+    transition: border-color 0.2s;
+  }
+  .filter-inline .fld select:focus, .filter-inline .fld input:focus { outline: none; border-color: var(--green); }
+  .btn-sm {
+    padding: 8px 18px; border-radius: 22px; font-size: 0.78rem; font-weight: 500;
+    cursor: pointer; font-family: inherit; transition: all 0.2s; border: none;
+  }
+  .btn-sm.primary { background: var(--green-btn); color: #fff; }
+  .btn-sm.primary:hover { background: var(--green-btn-hover); }
+  .btn-sm.ghost {
+    background: transparent; border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text-muted);
+  }
+  .btn-sm.ghost:hover { border-color: rgba(74,222,128,0.30); color: #f0fdf4; }
+
+  /* Summary text */
+  .insight {
+    margin-top: 16px; padding: 16px 20px;
+    background: rgba(74,222,128,0.04);
+    border: 1px solid rgba(74,222,128,0.10);
+    border-radius: var(--radius); font-size: 0.78rem;
+    color: var(--text-muted); line-height: 1.7;
+    font-family: 'Neue Haas Text','Helvetica Neue',sans-serif;
+  }
+  .insight strong { color: var(--green); font-weight: 500; }
+
+  /* Login overlay */
+  .login-overlay {
+    position: fixed; inset: 0; z-index: 60;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(4,8,5,0.88); backdrop-filter: blur(24px);
+  }
+  .login-card {
+    background: rgba(6,14,10,0.94); border: 1px solid rgba(74,222,128,0.15);
+    border-radius: 20px; padding: 36px 32px; width: 400px; max-width: 90vw;
+    backdrop-filter: blur(16px); text-align: center;
+  }
+  .login-card h2 { font-size: 1.3rem; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .login-card p { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 24px; font-family: 'Neue Haas Text','Helvetica Neue',sans-serif; }
+  .login-card .fld { text-align: left; margin-bottom: 14px; }
+  .login-card .fld label { display: block; font-size: 0.66rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Neue Haas Text','Helvetica Neue',sans-serif; font-weight: 500; margin-bottom: 6px; }
+  .login-card .fld input, .login-card .fld select {
+    width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+    color: #f0fdf4; padding: 10px 16px; border-radius: 12px; font-size: 0.85rem;
+    font-family: inherit; transition: border-color 0.2s;
+  }
+  .login-card .fld input:focus, .login-card .fld select:focus { outline: none; border-color: var(--green); }
+  .btn-login { width: 100%; padding: 12px; margin-top: 8px; background: var(--green-btn); color: #fff; border: none; border-radius: 14px; font-size: 0.88rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+  .btn-login:hover { background: var(--green-btn-hover); }
+
+  /* Horizontal scroll for charts */
+  .scroll-x { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="vignette"></div>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-brand">COROS <em>Dashboard</em></div>
+  <div class="nav-pill" id="navPill">
+    <button data-tab="overview" class="active">概览</button>
+    <button data-tab="trend">趋势</button>
+    <button data-tab="body">身体</button>
+    <button data-tab="sleep">睡眠</button>
+    <button data-tab="activities">活动</button>
+  </div>
+  <div class="nav-actions">
+    <span class="user-chip">maqiang@coros</span>
+    <button class="btn-sync">同步数据</button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-tag">2026年摘要 · 1月 — 5月</div>
+  <div class="hero-title">你的运动<em>全貌</em></div>
+  <p class="hero-desc">基于 COROS 数据追踪表现。点击 Tab 切换各维度分析，点击活动查看详情。</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-panel">
+  <div class="stat-mini"><div class="sm-label">2026 活动</div><div class="sm-value">86<span class="sm-unit">次</span></div></div>
+  <div class="stat-mini"><div class="sm-label">总距离</div><div class="sm-value">582<span class="sm-unit">km</span></div></div>
+  <div class="stat-mini"><div class="sm-label">总时长</div><div class="sm-value">68<span class="sm-unit">h</span></div></div>
+  <div class="stat-mini"><div class="sm-label">总消耗</div><div class="sm-value">38.5k<span class="sm-unit">kcal</span></div></div>
+</div>
+
+<!-- Activity Rail -->
+<div class="activity-rail">
+  <div class="act-chip" onclick="openDetail()"><div class="dot dot-hike"></div><div class="info"><div class="name">周末登山 · 凤凰岭</div><div class="meta">5月18日 · 3h 12min</div></div><div class="val"><strong>12.5</strong> km</div></div>
+  <div class="act-chip" onclick="openDetail()"><div class="dot dot-run"></div><div class="info"><div class="name">晨跑 10K</div><div class="meta">5月17日 · 52min</div></div><div class="val"><strong>10.2</strong> km</div></div>
+  <div class="act-chip" onclick="openDetail()"><div class="dot dot-bike"></div><div class="info"><div class="name">夜骑三环</div><div class="meta">5月16日 · 1h 45min</div></div><div class="val"><strong>42.3</strong> km</div></div>
+  <div class="act-chip" onclick="openDetail()"><div class="dot dot-run"></div><div class="info"><div class="name">间歇跑训练</div><div class="meta">5月14日 · 1h 05min</div></div><div class="val"><strong>8.5</strong> km</div></div>
+</div>
+
+<!-- ===== TAB PANELS ===== -->
+
+<!-- Tab: 趋势 (Trend) -->
+<div id="tab-trend" class="tab-panel" onclick="if(event.target===this)closeAllTabs()">
+  <div class="tab-backdrop"></div>
+  <div class="tab-content">
+    <div class="tab-handle" onclick="closeAllTabs()"></div>
+    <h3>训练趋势</h3>
+    <div class="filter-inline">
+      <div class="fld"><label>视图</label><select><option>按周汇总</option><option>按月汇总</option></select></div>
+      <div class="fld"><label>运动类型</label><select><option>全部</option><option>跑步</option><option>登山</option><option>骑行</option></select></div>
+      <div class="fld"><label>从</label><input type="date" value="2026-01-01"></div>
+      <div class="fld"><label>到</label><input type="date" value="2026-05-21"></div>
+      <button class="btn-sm primary">应用</button>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><h4>每周距离趋势</h4><div class="chart-box">ECharts 柱状图 — 各周跑步/登山/骑行距离堆叠</div></div>
+      <div class="metric-card"><h4>每周时长趋势</h4><div class="chart-box">ECharts 面积图 — 各运动时长分布</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><h4>训练负荷趋势</h4><div class="chart-box">ECharts 折线图 — 7日滚动训练负荷 + 趋势线</div></div>
+      <div class="metric-card"><h4>VO₂max 变化</h4><div class="chart-box">ECharts 折线图 — 月度 VO₂max 估值</div></div>
+    </div>
+    <div class="data-card"><h4>周汇总数据</h4><div class="scroll-x"><table class="data-table">
+      <thead><tr><th>周</th><th>日期范围</th><th>活动数</th><th>距离(km)</th><th>时长(h)</th><th>爬升(m)</th><th>消耗(kcal)</th><th>训练负荷</th></tr></thead>
+      <tbody>
+        <tr><td>W20</td><td>5/12-5/18</td><td>4</td><td>27.5</td><td>4.8</td><td>920</td><td>1,480</td><td>142</td></tr>
+        <tr><td>W19</td><td>5/05-5/11</td><td>3</td><td>18.2</td><td>3.1</td><td>250</td><td>890</td><td>98</td></tr>
+        <tr><td>W18</td><td>4/28-5/04</td><td>5</td><td>35.1</td><td>5.5</td><td>1,120</td><td>2,050</td><td>185</td></tr>
+        <tr><td>W17</td><td>4/21-4/27</td><td>3</td><td>22.0</td><td>3.3</td><td>480</td><td>1,200</td><td>112</td></tr>
+        <tr><td>W16</td><td>4/14-4/20</td><td>4</td><td>28.7</td><td>4.2</td><td>650</td><td>1,580</td><td>135</td></tr>
+      </tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<!-- Tab: 身体 (Body) -->
+<div id="tab-body" class="tab-panel" onclick="if(event.target===this)closeAllTabs()">
+  <div class="tab-backdrop"></div>
+  <div class="tab-content">
+    <div class="tab-handle" onclick="closeAllTabs()"></div>
+    <h3>身体指标</h3>
+    <div class="filter-inline">
+      <div class="fld"><label>从</label><input type="date" value="2026-01-01"></div>
+      <div class="fld"><label>到</label><input type="date" value="2026-05-21"></div>
+      <button class="btn-sm primary">应用</button>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><h4>HRV 趋势 (7日夜间)</h4><div class="chart-box">ECharts 折线图 — 夜间 HRV 均值 + 基线区间</div></div>
+      <div class="metric-card"><h4>静息心率趋势</h4><div class="chart-box">ECharts 折线图 — 每日 RHR + 7日均线</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><h4>训练负荷比率</h4><div class="chart-box">ECharts 面积图 — 负荷比 + 阈值线(0.8/1.2)</div></div>
+      <div class="metric-card"><h4>体力水平 (Stamina)</h4><div class="chart-box">ECharts 双线图 — 当日体力 + 7日均值</div></div>
+    </div>
+    <div class="data-card"><h4>每日指标明细</h4><div class="scroll-x"><table class="data-table">
+      <thead><tr><th>日期</th><th>HRV</th><th>基线</th><th>RHR</th><th>训练负荷</th><th>负荷比</th><th>VO₂max</th><th>体力</th><th>疲劳度</th></tr></thead>
+      <tbody>
+        <tr><td>05/18</td><td>52</td><td>48</td><td>48</td><td>72</td><td>1.05</td><td>48.2</td><td>82</td><td>3.2</td></tr>
+        <tr><td>05/17</td><td>55</td><td>48</td><td>46</td><td>58</td><td>0.92</td><td>48.0</td><td>85</td><td>2.8</td></tr>
+        <tr><td>05/16</td><td>49</td><td>48</td><td>47</td><td>45</td><td>0.85</td><td>47.9</td><td>88</td><td>2.5</td></tr>
+        <tr><td>05/15</td><td>53</td><td>49</td><td>45</td><td>38</td><td>0.78</td><td>47.9</td><td>90</td><td>2.1</td></tr>
+        <tr><td>05/14</td><td>50</td><td>49</td><td>46</td><td>65</td><td>1.10</td><td>47.8</td><td>83</td><td>3.5</td></tr>
+      </tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<!-- Tab: 睡眠 (Sleep) -->
+<div id="tab-sleep" class="tab-panel" onclick="if(event.target===this)closeAllTabs()">
+  <div class="tab-backdrop"></div>
+  <div class="tab-content">
+    <div class="tab-handle" onclick="closeAllTabs()"></div>
+    <h3>睡眠分析</h3>
+    <div class="filter-inline">
+      <div class="fld"><label>从</label><input type="date" value="2026-01-01"></div>
+      <div class="fld"><label>到</label><input type="date" value="2026-05-21"></div>
+      <button class="btn-sm primary">应用</button>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><h4>睡眠时长趋势</h4><div class="chart-box">ECharts 柱状图 — 深睡/浅睡/REM/清醒 堆叠</div></div>
+      <div class="metric-card"><h4>睡眠质量评分</h4><div class="chart-box">ECharts 折线图 — 每日质量分 + 趋势</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><h4>睡眠心率</h4><div class="chart-box">ECharts 区间图 — 平均/最低/最高心率</div></div>
+      <div class="metric-card"><h4>睡眠阶段占比</h4><div class="chart-box">ECharts 环形图 — 各阶段平均占比</div></div>
+    </div>
+    <div class="data-card"><h4>睡眠记录明细</h4><div class="scroll-x"><table class="data-table">
+      <thead><tr><th>日期</th><th>总时长</th><th>深睡(min)</th><th>浅睡(min)</th><th>REM(min)</th><th>清醒(min)</th><th>均心率</th><th>质量</th></tr></thead>
+      <tbody>
+        <tr><td>05/18</td><td>7h 35m</td><td>132</td><td>215</td><td>85</td><td>23</td><td>52</td><td>85</td></tr>
+        <tr><td>05/17</td><td>8h 10m</td><td>155</td><td>228</td><td>92</td><td>15</td><td>48</td><td>92</td></tr>
+        <tr><td>05/16</td><td>6h 45m</td><td>108</td><td>195</td><td>72</td><td>30</td><td>54</td><td>72</td></tr>
+        <tr><td>05/15</td><td>7h 50m</td><td>140</td><td>220</td><td>88</td><td>22</td><td>50</td><td>88</td></tr>
+        <tr><td>05/14</td><td>7h 20m</td><td>125</td><td>210</td><td>80</td><td>25</td><td>51</td><td>80</td></tr>
+      </tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<!-- Tab: 活动 (Activities) -->
+<div id="tab-activities" class="tab-panel" onclick="if(event.target===this)closeAllTabs()">
+  <div class="tab-backdrop"></div>
+  <div class="tab-content">
+    <div class="tab-handle" onclick="closeAllTabs()"></div>
+    <h3>活动记录</h3>
+    <div class="filter-inline">
+      <div class="fld"><label>类型</label><select><option>全部</option><option>跑步</option><option>登山</option><option>骑行</option><option>力量训练</option><option>游泳</option></select></div>
+      <div class="fld"><label>从</label><input type="date" value="2026-01-01"></div>
+      <div class="fld"><label>到</label><input type="date" value="2026-05-21"></div>
+      <div class="fld"><label>排序</label><select><option>时间降序</option><option>距离降序</option><option>时长降序</option></select></div>
+      <button class="btn-sm primary">筛选</button>
+      <button class="btn-sm ghost">重置</button>
+    </div>
+    <div class="data-card">
+      <div class="scroll-x"><table class="data-table">
+        <thead><tr><th>日期</th><th>类型</th><th>名称</th><th>距离(km)</th><th>时长</th><th>配速</th><th>心率</th><th>爬升(m)</th><th>消耗</th><th>负荷</th><th></th></tr></thead>
+        <tbody>
+          <tr onclick="openDetail()" style="cursor:pointer"><td>05/18</td><td><span class="badge badge-hike">登山</span></td><td>周末登山 · 凤凰岭</td><td>12.50</td><td>3:12:05</td><td>15:22</td><td>135</td><td>860</td><td>780</td><td>72</td><td style="color:var(--green)">查看 →</td></tr>
+          <tr onclick="openDetail()" style="cursor:pointer"><td>05/17</td><td><span class="badge badge-run">跑步</span></td><td>晨跑 10K</td><td>10.20</td><td>52:00</td><td>5:06</td><td>148</td><td>45</td><td>520</td><td>58</td><td style="color:var(--green)">查看 →</td></tr>
+          <tr onclick="openDetail()" style="cursor:pointer"><td>05/16</td><td><span class="badge badge-bike">骑行</span></td><td>夜骑三环</td><td>42.30</td><td>1:45:00</td><td>24.2</td><td>128</td><td>120</td><td>650</td><td>45</td><td style="color:var(--green)">查看 →</td></tr>
+          <tr onclick="openDetail()" style="cursor:pointer"><td>05/15</td><td><span class="badge badge-strength">力量</span></td><td>力量训练</td><td>—</td><td>0:45:00</td><td>—</td><td>110</td><td>—</td><td>320</td><td>38</td><td style="color:var(--green)">查看 →</td></tr>
+          <tr onclick="openDetail()" style="cursor:pointer"><td>05/14</td><td><span class="badge badge-run">跑步</span></td><td>间歇跑训练</td><td>8.50</td><td>1:05:00</td><td>4:38</td><td>158</td><td>30</td><td>480</td><td>65</td><td style="color:var(--green)">查看 →</td></tr>
+          <tr onclick="openDetail()" style="cursor:pointer"><td>05/12</td><td><span class="badge badge-swim">游泳</span></td><td>自由泳训练</td><td>1.50</td><td>0:35:00</td><td>23:20</td><td>142</td><td>—</td><td>285</td><td>32</td><td style="color:var(--green)">查看 →</td></tr>
+          <tr onclick="openDetail()" style="cursor:pointer"><td>05/10</td><td><span class="badge badge-hike">登山</span></td><td>香山拉练</td><td>8.20</td><td>2:45:00</td><td>20:07</td><td>125</td><td>520</td><td>580</td><td>55</td><td style="color:var(--green)">查看 →</td></tr>
+          <tr onclick="openDetail()" style="cursor:pointer"><td>05/08</td><td><span class="badge badge-bike">骑行</span></td><td>周末长途</td><td>78.50</td><td>3:30:00</td><td>22.4</td><td>132</td><td>580</td><td>1,250</td><td>85</td><td style="color:var(--green)">查看 →</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="insight"><strong>摘要：</strong>2026年至今共 86 次活动，跑量 280km、登山 95km、骑行 195km、游泳 12km。训练负荷呈上升趋势，近 4 周周均负荷 135，VO₂max 从年初 46.5 提升至 48.2。</div>
+  </div>
+</div>
+
+<!-- Detail Sheet -->
+<div id="detailSheet" class="tab-panel" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="tab-backdrop"></div>
+  <div class="tab-content">
+    <div class="tab-handle" onclick="document.getElementById('detailSheet').classList.remove('active')"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+      <div class="dot dot-hike" style="width:11px;height:11px;"></div>
+      <div>
+        <div style="font-size:1.15rem;font-weight:500;">周末登山 · 凤凰岭</div>
+        <div style="font-size:0.73rem;color:var(--text-muted);margin-top:3px;">2026年5月18日 08:30 — 11:42 · 登山</div>
+      </div>
+    </div>
+    <div class="metric-row" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px;">
+      <div class="metric-card" style="text-align:center"><div style="font-size:1.3rem;font-weight:400;color:#f0fdf4">12.50<span style="font-size:0.7rem;color:var(--text-muted)"> km</span></div><div style="font-size:0.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">距离</div></div>
+      <div class="metric-card" style="text-align:center"><div style="font-size:1.3rem;font-weight:400;color:#f0fdf4">3:12:05</div><div style="font-size:0.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">时长</div></div>
+      <div class="metric-card" style="text-align:center"><div style="font-size:1.3rem;font-weight:400;color:#f0fdf4">860<span style="font-size:0.7rem;color:var(--text-muted)"> m</span></div><div style="font-size:0.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">爬升</div></div>
+      <div class="metric-card" style="text-align:center"><div style="font-size:1.3rem;font-weight:400;color:#f0fdf4">135<span style="font-size:0.7rem;color:var(--text-muted)"> bpm</span></div><div style="font-size:0.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">心率</div></div>
+      <div class="metric-card" style="text-align:center"><div style="font-size:1.3rem;font-weight:400;color:#f0fdf4">780<span style="font-size:0.7rem;color:var(--text-muted)"> kcal</span></div><div style="font-size:0.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">消耗</div></div>
+      <div class="metric-card" style="text-align:center"><div style="font-size:1.3rem;font-weight:400;color:#f0fdf4">72</div><div style="font-size:0.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">负荷</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><h4>配速 & 海拔曲线</h4><div class="chart-box">ECharts 双Y轴折线图</div></div>
+      <div class="metric-card"><h4>心率区间分布</h4><div class="chart-box">ECharts 环形占比图 — 5区间</div></div>
+    </div>
+    <div class="data-card"><h4>分段数据</h4><div class="scroll-x"><table class="data-table">
+      <thead><tr><th>#</th><th>距离(km)</th><th>时长</th><th>配速</th><th>心率</th><th>步频</th><th>爬升(m)</th><th>卡路里</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>3.2</td><td>42:15</td><td>13:12</td><td>128</td><td>98</td><td>210</td><td>195</td></tr>
+        <tr><td>2</td><td>4.1</td><td>1:05:30</td><td>15:58</td><td>142</td><td>85</td><td>480</td><td>350</td></tr>
+        <tr><td>3</td><td>3.8</td><td>55:20</td><td>14:34</td><td>136</td><td>95</td><td>140</td><td>170</td></tr>
+        <tr><td>4</td><td>1.4</td><td>9:00</td><td>6:25</td><td>118</td><td>155</td><td>30</td><td>65</td></tr>
+      </tbody>
+    </table></div></div>
+    <div class="insight"><strong>运动小结：</strong>全程 12.5km，累计爬升 860m，用时 3h12min。平均心率 135bpm（有氧耐力区间），训练负荷 72。爬升集中在第 2 分段（4.1km 爬升 480m，坡度 11.7%），最后 1.4km 下坡快速恢复。</div>
+  </div>
+</div>
+
+<!-- Login -->
+<div class="login-overlay">
+  <div class="login-card">
+    <h2>登录 COROS 账号</h2>
+    <p>连接训练数据，开启运动深度分析</p>
+    <div class="fld"><label>邮箱</label><input type="email" placeholder="coros@example.com"></div>
+    <div class="fld"><label>密码</label><input type="password" placeholder="••••••••"></div>
+    <div class="fld"><label>地区</label><select><option>中国大陆</option><option>欧洲</option><option>美国</option><option>亚太</option></select></div>
+    <button class="btn-login" onclick="document.querySelector('.login-overlay').style.display='none'">连接 COROS</button>
+  </div>
+</div>
+
+<script>
+// ===== Tab switching =====
+const tabs = document.querySelectorAll('#navPill button');
+tabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabs.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tabId = 'tab-' + btn.dataset.tab;
+    closeAllTabs();
+    if (tabId !== 'tab-overview') {
+      document.getElementById(tabId).classList.add('active');
+    }
+  });
+});
+function closeAllTabs() {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+}
+function openDetail() {
+  closeAllTabs();
+  document.getElementById('detailSheet').classList.add('active');
+}
+
+// ===== Three.js 3D Terrain =====
+(function() {
+  const canvas = document.getElementById('bgCanvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x040805, 0.00004);
+
+  const camera = new THREE.PerspectiveCamera(48, window.innerWidth/window.innerHeight, 0.5, 200);
+  camera.position.set(20, 16, 26);
+  camera.lookAt(0, -2, 0);
+
+  // Brighter ambient
+  scene.add(new THREE.AmbientLight(0x2a5a3a, 0.8));
+  const sun = new THREE.DirectionalLight(0x4ade80, 1.2);
+  sun.position.set(25, 35, 15);
+  sun.castShadow = true;
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0x22c55e, 0.5);
+  fill.position.set(-15, 8, -12);
+  scene.add(fill);
+
+  // High-res terrain
+  const SIZE = 64, SEG = 150;
+  const geom = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
+  geom.rotateX(-Math.PI/2);
+  const pos = geom.attributes.position.array;
+  for (let i = 0; i < pos.length; i += 3) {
+    const x = pos[i], z = pos[i+2];
+    const h = Math.sin(x*0.28)*Math.cos(z*0.24)*3.0
+            + Math.sin(x*0.65+1.8)*Math.cos(z*0.55)*1.5
+            + Math.cos(x*1.1)*Math.sin(z*0.9)*1.0
+            + Math.sin(x*1.8+z*1.3)*0.6
+            + Math.abs(Math.sin(x*0.12)*Math.cos(z*0.15))*3.5
+            + Math.cos(x*0.45+z*0.35)*0.8;
+    pos[i+1] = Math.max(h, 0) * 2.0;
+  }
+  geom.computeVertexNormals();
+  const terrain = new THREE.Mesh(geom, new THREE.MeshStandardMaterial({
+    color: 0x1a2e18, roughness: 0.75, metalness: 0.05, flatShading: false,
+  }));
+  terrain.position.y = -5;
+  terrain.receiveShadow = true;
+  scene.add(terrain);
+
+  // Contour lines
+  const contourGroup = new THREE.Group();
+  scene.add(contourGroup);
+  for (let level = 0.5; level < 8; level += 0.6) {
+    const contourGeom = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
+    contourGeom.rotateX(-Math.PI/2);
+    const cp = contourGeom.attributes.position.array;
+    const contourY = level - 5;
+    for (let i = 0; i < cp.length; i += 3) {
+      const x = cp[i], z = cp[i+2];
+      const h = Math.sin(x*0.28)*Math.cos(z*0.24)*3.0
+              + Math.sin(x*0.65+1.8)*Math.cos(z*0.55)*1.5
+              + Math.cos(x*1.1)*Math.sin(z*0.9)*1.0
+              + Math.sin(x*1.8+z*1.3)*0.6
+              + Math.abs(Math.sin(x*0.12)*Math.cos(z*0.15))*3.5
+              + Math.cos(x*0.45+z*0.35)*0.8;
+      const terrainY = Math.max(h,0)*2.0 - 5;
+      cp[i+1] = contourY;
+    }
+    const edgesGeom = new THREE.EdgesGeometry(contourGeom, 2.5);
+    const line = new THREE.LineSegments(edgesGeom, new THREE.LineBasicMaterial({
+      color: 0x4ade80, transparent: true, opacity: 0.12,
+      depthTest: true,
+    }));
+    contourGroup.add(line);
+  }
+
+  // GPS Trails
+  const trailGroup = new THREE.Group();
+  scene.add(trailGroup);
+  const trailColors = [0x4ade80, 0x22c55e, 0xfacc15, 0x38bdf8, 0xc084fc, 0x34d399];
+  const trails = [];
+
+  function makePath() {
+    const pts = [];
+    let cx = (Math.random()-0.5)*36, cz = (Math.random()-0.5)*36;
+    for (let i=0; i<=90; i++) {
+      cx += (Math.random()-0.5)*2.8;
+      cz += (Math.random()-0.5)*2.8;
+      cx = Math.max(-24,Math.min(24,cx));
+      cz = Math.max(-24,Math.min(24,cz));
+      const h = Math.sin(cx*0.28)*Math.cos(cz*0.24)*3.0
+              + Math.sin(cx*0.65+1.8)*Math.cos(cz*0.55)*1.5
+              + Math.cos(cx*1.1)*Math.sin(cz*0.9)*1.0
+              + Math.sin(cx*1.8+cz*1.3)*0.6
+              + Math.abs(Math.sin(cx*0.12)*Math.cos(cz*0.15))*3.5
+              + Math.cos(cx*0.45+cz*0.35)*0.8;
+      pts.push(new THREE.Vector3(cx, Math.max(h,0)*2.0-4.85, cz));
+    }
+    return pts;
+  }
+
+  for (let i=0; i<7; i++) {
+    const curve = new THREE.CatmullRomCurve3(makePath());
+    const tube = new THREE.Mesh(
+      new THREE.TubeGeometry(curve, 160, 0.07, 8, false),
+      new THREE.MeshStandardMaterial({
+        color: trailColors[i], emissive: trailColors[i],
+        emissiveIntensity: 0.8, roughness: 0.25, metalness: 0.3,
+        transparent: true, opacity: 0.85,
+      })
+    );
+    trailGroup.add(tube);
+    const dot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.16, 20, 20),
+      new THREE.MeshStandardMaterial({
+        color: trailColors[i], emissive: trailColors[i],
+        emissiveIntensity: 2.0, roughness: 0.1,
+      })
+    );
+    trailGroup.add(dot);
+    trails.push({ curve, dot, speed: 0.0005+Math.random()*0.0012, offset: Math.random() });
+  }
+
+  // Floating particles
+  const pGeom = new THREE.BufferGeometry();
+  const pCount = 400;
+  const pPos = new Float32Array(pCount*3);
+  for (let i=0; i<pCount; i++) {
+    pPos[i*3] = (Math.random()-0.5)*55;
+    pPos[i*3+1] = Math.random()*10-3;
+    pPos[i*3+2] = (Math.random()-0.5)*55;
+  }
+  pGeom.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  const particles = new THREE.Points(pGeom, new THREE.PointsMaterial({
+    color: 0x4ade80, size: 0.09, transparent: true, opacity: 0.55,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  scene.add(particles);
+
+  // Animate
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    camera.position.x = Math.cos(t*0.05) * 30;
+    camera.position.z = Math.sin(t*0.05) * 30;
+    camera.position.y = 13 + Math.sin(t*0.12) * 5;
+    camera.lookAt(0, -1.5, 0);
+
+    for (const tr of trails) {
+      tr.offset += tr.speed;
+      if (tr.offset > 1) tr.offset -= 1;
+      const pt = tr.curve.getPointAt(tr.offset);
+      tr.dot.position.copy(pt).add(new THREE.Vector3(0, 0.2, 0));
+    }
+    particles.rotation.y += 0.00025;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<h2>COROS 运动数据分析仪表盘 — 布局设计</h2>
+<p class="subtitle">Tab 切换式布局，5 个分析模块</p>
+
+<div class="mockup">
+  <div class="mockup-header">整体布局结构</div>
+  <div class="mockup-body">
+    <!-- Top bar -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#1a1a2e;border-radius:8px 8px 0 0;">
+      <span style="color:#e94560;font-weight:bold;font-size:1.1em;">⌂ COROS Dashboard</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span style="color:#aaa;font-size:0.8em;">👤 已登录</span>
+        <div class="mock-button" style="background:#e94560;border-color:#e94560;font-size:0.75em;">🔄 同步数据</div>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <div style="display:flex;background:#16213e;border-bottom:2px solid #e94560;">
+      <div style="padding:10px 18px;color:#fff;background:#e94560;border-radius:0;font-size:0.85em;">📊 运动概览</div>
+      <div style="padding:10px 18px;color:#aaa;font-size:0.85em;">📈 训练趋势</div>
+      <div style="padding:10px 18px;color:#aaa;font-size:0.85em;">❤️ 身体指标</div>
+      <div style="padding:10px 18px;color:#aaa;font-size:0.85em;">😴 睡眠分析</div>
+      <div style="padding:10px 18px;color:#aaa;font-size:0.85em;">🏃 活动记录</div>
+    </div>
+    <!-- Content area -->
+    <div style="padding:16px;background:#0f3460;min-height:280px;border-radius:0 0 8px 8px;">
+      <div style="display:flex;gap:12px;margin-bottom:12px;">
+        <div class="placeholder" style="flex:1;text-align:center;">🏃 总运动次数<br><strong>186</strong></div>
+        <div class="placeholder" style="flex:1;text-align:center;">📏 总距离 (km)<br><strong>1,250</strong></div>
+        <div class="placeholder" style="flex:1;text-align:center;">⏱ 总时长 (h)<br><strong>142</strong></div>
+        <div class="placeholder" style="flex:1;text-align:center;">🔥 总消耗 (kcal)<br><strong>82,300</strong></div>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <div class="placeholder" style="flex:2;min-height:160px;">📊 运动类型分布（饼图）</div>
+        <div class="placeholder" style="flex:3;min-height:160px;">📋 最近活动列表（表格）</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px;">
+  <h3>各 Tab 内容规划</h3>
+</div>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-body">
+      <h3>📊 运动概览</h3>
+      <p>统计卡片（运动次数/距离/时长/消耗）+ 运动类型分布饼图 + 最近活动列表</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h3>📈 训练趋势</h3>
+      <p>每周距离/时长柱状图 + 训练负荷趋势折线图 + VO2max 变化曲线</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h3>❤️ 身体指标</h3>
+      <p>HRV 趋势 + 静息心率趋势 + 心率区间分布图</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h3>😴 睡眠分析</h3>
+      <p>睡眠时长趋势 + 睡眠阶段堆叠柱状图 + 睡眠质量评分曲线</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h3>🏃 活动记录</h3>
+      <p>可筛选活动列表（按类型/日期）+ 单次活动详情（配速/心率/海拔等）</p>
+    </div>
+  </div>
+</div>
+</div>

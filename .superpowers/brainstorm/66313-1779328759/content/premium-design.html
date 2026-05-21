@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COROS Dashboard - Premium Dark</title>
+<style>
+  :root {
+    --bg-primary: #0f0f14;
+    --bg-secondary: #18181f;
+    --bg-card: #1c1c26;
+    --bg-card-hover: #22222e;
+    --border: #2a2a36;
+    --text-primary: #e8e8ed;
+    --text-secondary: #9898a8;
+    --text-muted: #686878;
+    --accent-run: #7b8c7b;
+    --accent-hike: #8b7b6b;
+    --accent-bike: #6b7b8b;
+    --accent-swim: #6b8b8b;
+    --accent-other: #7b7b8b;
+    --accent-brand: #b8a88a;
+    --accent-warn: #a08060;
+    --accent-good: #6b8b6b;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.3);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0; border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .logo { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.5px; color: var(--text-primary); }
+  .logo span { color: var(--accent-brand); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .login-badge {
+    font-size: 0.8rem; color: var(--text-secondary);
+    padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px;
+    background: var(--bg-secondary);
+  }
+  .btn {
+    padding: 8px 18px; border-radius: 20px; border: none;
+    font-size: 0.82rem; cursor: pointer; font-weight: 500;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary { background: var(--accent-brand); color: #1a1a20; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--text-muted); color: var(--text-primary); }
+
+  /* Login panel */
+  .login-panel {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
+    display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .field input, .field select {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    color: var(--text-primary); padding: 8px 14px; border-radius: var(--radius-sm);
+    font-size: 0.85rem; min-width: 180px;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--accent-brand); }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 0; margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 10px 22px; font-size: 0.85rem; color: var(--text-muted);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none;
+    letter-spacing: 0.3px;
+  }
+  .tab:hover { color: var(--text-secondary); }
+  .tab.active { color: var(--accent-brand); border-bottom-color: var(--accent-brand); }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--text-muted); }
+  .stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .stat-value { font-size: 1.6rem; font-weight: 600; color: var(--text-primary); }
+  .stat-unit { font-size: 0.8rem; color: var(--text-muted); margin-left: 4px; font-weight: 400; }
+
+  /* Content grid */
+  .content-grid { display: grid; gap: 14px; margin-bottom: 22px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1.5fr; }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    font-size: 0.82rem; font-weight: 500; color: var(--text-secondary);
+    letter-spacing: 0.3px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .card-body { padding: 18px; }
+
+  /* Chart placeholder */
+  .chart-placeholder {
+    width: 100%; height: 220px; background: var(--bg-secondary);
+    border-radius: var(--radius-sm); display: flex; align-items: center;
+    justify-content: center; color: var(--text-muted); font-size: 0.82rem;
+    border: 1px dashed var(--border);
+  }
+
+  /* Activity list */
+  .activity-row {
+    display: flex; align-items: center; padding: 10px 14px;
+    border-bottom: 1px solid var(--border); gap: 14px;
+    transition: background 0.15s; cursor: pointer;
+  }
+  .activity-row:hover { background: var(--bg-card-hover); }
+  .activity-row:last-child { border-bottom: none; }
+  .sport-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .sport-icon.run { background: rgba(123,140,123,0.2); color: var(--accent-run); }
+  .sport-icon.hike { background: rgba(139,123,107,0.2); color: var(--accent-hike); }
+  .sport-icon.bike { background: rgba(107,123,139,0.2); color: var(--accent-bike); }
+  .sport-icon.swim { background: rgba(107,139,139,0.2); color: var(--accent-swim); }
+  .sport-icon.other { background: rgba(123,123,139,0.2); color: var(--accent-other); }
+  .activity-info { flex:1; min-width:0; }
+  .activity-name { font-size: 0.85rem; font-weight: 500; }
+  .activity-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+  .activity-stat { text-align: right; font-size: 0.82rem; color: var(--text-secondary); }
+  .activity-stat strong { color: var(--text-primary); }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex; gap: 10px; padding: 10px 0; flex-wrap: wrap; align-items: center;
+  }
+  .filter-bar .field { flex-direction: row; align-items: center; gap: 8px; }
+  .filter-bar .field label { font-size: 0.75rem; }
+  .filter-bar .field input, .filter-bar .field select { min-width: 120px; padding: 6px 10px; font-size: 0.8rem; }
+
+  /* Detail view */
+  .detail-back {
+    color: var(--accent-brand); cursor: pointer; font-size: 0.82rem;
+    display: inline-flex; align-items: center; gap: 6px; margin-bottom: 18px;
+  }
+  .detail-back:hover { opacity: 0.8; }
+  .detail-hero {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px;
+    margin-bottom: 20px;
+  }
+  .detail-metric { text-align: center; }
+  .detail-metric .dm-value { font-size: 1.3rem; font-weight: 600; }
+  .detail-metric .dm-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; letter-spacing: 0.5px; }
+
+  .laps-table {
+    width: 100%; border-collapse: collapse; font-size: 0.8rem;
+  }
+  .laps-table th {
+    text-align: left; padding: 10px 14px; color: var(--text-muted);
+    font-weight: 500; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
+  }
+  .laps-table td {
+    padding: 8px 14px; border-bottom: 1px solid rgba(42,42,54,0.5);
+    color: var(--text-secondary);
+  }
+  .laps-table tr:hover td { background: var(--bg-card-hover); }
+
+  /* Summary text */
+  .summary-text {
+    color: var(--text-secondary); font-size: 0.82rem; line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">COROS <span>运动分析</span></div>
+    <div class="header-right">
+      <span class="login-badge">👤 已登录</span>
+      <button class="btn btn-primary">🔄 同步最新数据</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active">运动概览</button>
+    <button class="tab">训练趋势</button>
+    <button class="tab">身体指标</button>
+    <button class="tab">睡眠分析</button>
+    <button class="tab">活动记录</button>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">总活动次数</div>
+      <div class="stat-value">186<span class="stat-unit">次</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">总运动距离</div>
+      <div class="stat-value">1,250<span class="stat-unit">km</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">总运动时长</div>
+      <div class="stat-value">142<span class="stat-unit">h</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">总卡路里消耗</div>
+      <div class="stat-value">82,300<span class="stat-unit">kcal</span></div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="content-grid grid-3">
+    <div class="card">
+      <div class="card-header">运动类型分布</div>
+      <div class="card-body">
+        <div class="chart-placeholder">🥧 ECharts 饼图 — 各运动类型占比</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">最近活动 <span style="font-weight:400;font-size:0.72rem;color:var(--text-muted)">查看全部 →</span></div>
+      <div class="card-body" style="padding:0;">
+        <div class="activity-row">
+          <div class="sport-icon hike">🥾</div>
+          <div class="activity-info">
+            <div class="activity-name">周末登山</div>
+            <div class="activity-meta">2026-05-18 · 08:30 · 3h 12min</div>
+          </div>
+          <div class="activity-stat"><strong>12.5 km</strong></div>
+          <div class="activity-stat">↗ <strong>860 m</strong></div>
+          <div class="activity-stat">♥ <strong>135 bpm</strong></div>
+        </div>
+        <div class="activity-row">
+          <div class="sport-icon run">🏃</div>
+          <div class="activity-info">
+            <div class="activity-name">晨跑 10K</div>
+            <div class="activity-meta">2026-05-17 · 06:45 · 52min</div>
+          </div>
+          <div class="activity-stat"><strong>10.2 km</strong></div>
+          <div class="activity-stat">⚡ <strong>5:06 /km</strong></div>
+          <div class="activity-stat">♥ <strong>148 bpm</strong></div>
+        </div>
+        <div class="activity-row">
+          <div class="sport-icon bike">🚴</div>
+          <div class="activity-info">
+            <div class="activity-name">夜骑三环</div>
+            <div class="activity-meta">2026-05-16 · 19:30 · 1h 45min</div>
+          </div>
+          <div class="activity-stat"><strong>42.3 km</strong></div>
+          <div class="activity-stat">⚡ <strong>24.2 km/h</strong></div>
+          <div class="activity-stat">♥ <strong>128 bpm</strong></div>
+        </div>
+        <div class="activity-row">
+          <div class="sport-icon other">🧘</div>
+          <div class="activity-info">
+            <div class="activity-name">力量训练</div>
+            <div class="activity-meta">2026-05-15 · 17:00 · 45min</div>
+          </div>
+          <div class="activity-stat"><strong>—</strong></div>
+          <div class="activity-stat">🔥 <strong>320 kcal</strong></div>
+          <div class="activity-stat">♥ <strong>110 bpm</strong></div>
+        </div>
+        <div class="activity-row">
+          <div class="sport-icon run">🏃</div>
+          <div class="activity-info">
+            <div class="activity-name">间歇跑训练</div>
+            <div class="activity-meta">2026-05-14 · 06:30 · 1h 05min</div>
+          </div>
+          <div class="activity-stat"><strong>8.5 km</strong></div>
+          <div class="activity-stat">⚡ <strong>4:38 /km</strong></div>
+          <div class="activity-stat">♥ <strong>158 bpm</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Detail Mockup (when clicking an activity) -->
+  <div style="margin-top: 10px;">
+    <h3 style="font-size:0.9rem;color:var(--text-muted);margin-bottom:14px;">点击活动后 → 详情展开效果</h3>
+  </div>
+
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="card-header">
+      <span class="detail-back">← 返回列表</span>
+      <span style="font-size:0.75rem;color:var(--text-muted);">活动ID: 123456789</span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+        <div class="sport-icon hike" style="width:44px;height:44px;font-size:1.3rem;">🥾</div>
+        <div>
+          <div style="font-size:1.1rem;font-weight:600;">周末登山 · 凤凰岭</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);">2026-05-18 08:30 — 11:42 · 登山</div>
+        </div>
+      </div>
+
+      <div class="detail-hero">
+        <div class="detail-metric"><div class="dm-value">12.50<span style="font-size:0.8rem;color:var(--text-muted)">km</span></div><div class="dm-label">距离</div></div>
+        <div class="detail-metric"><div class="dm-value">3:12:05<span style="font-size:0.8rem;color:var(--text-muted)"></span></div><div class="dm-label">时长</div></div>
+        <div class="detail-metric"><div class="dm-value">860<span style="font-size:0.8rem;color:var(--text-muted)">m</span></div><div class="dm-label">爬升</div></div>
+        <div class="detail-metric"><div class="dm-value">135<span style="font-size:0.8rem;color:var(--text-muted)">bpm</span></div><div class="dm-label">平均心率</div></div>
+        <div class="detail-metric"><div class="dm-value">780<span style="font-size:0.8rem;color:var(--text-muted)">kcal</span></div><div class="dm-label">卡路里</div></div>
+        <div class="detail-metric"><div class="dm-value">72<span style="font-size:0.8rem;color:var(--text-muted)"></span></div><div class="dm-label">训练负荷</div></div>
+      </div>
+
+      <div class="content-grid grid-2" style="margin-bottom:14px;">
+        <div class="card"><div class="card-header">配速 & 海拔曲线</div><div class="card-body"><div class="chart-placeholder" style="height:200px;">📈 双Y轴折线图：配速 + 海拔随时间变化</div></div></div>
+        <div class="card"><div class="card-header">心率区间分布</div><div class="card-body"><div class="chart-placeholder" style="height:200px;">📊 柱状图或环形图：各区段时间占比</div></div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-header">分段数据 (Laps)</div>
+        <div class="card-body" style="padding:0;overflow-x:auto;">
+          <table class="laps-table">
+            <thead><tr><th>#</th><th>距离</th><th>时长</th><th>配速</th><th>心率</th><th>步频</th><th>爬升</th><th>卡路里</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>3.2 km</td><td>42:15</td><td>13:12 /km</td><td>128 bpm</td><td>98 spm</td><td>210 m</td><td>195</td></tr>
+              <tr><td>2</td><td>4.1 km</td><td>65:30</td><td>15:58 /km</td><td>142 bpm</td><td>85 spm</td><td>480 m</td><td>350</td></tr>
+              <tr><td>3</td><td>3.8 km</td><td>55:20</td><td>14:34 /km</td><td>136 bpm</td><td>95 spm</td><td>140 m</td><td>170</td></tr>
+              <tr><td>4</td><td>1.4 km</td><td>9:00</td><td>6:25 /km</td><td>118 bpm</td><td>155 spm</td><td>30 m</td><td>65</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="summary-text">
+        <strong>运动小结：</strong>全程 12.5km，累计爬升 860m，用时 3 小时 12 分。平均心率 135bpm，处于有氧耐力区间，训练负荷 72，属于中等强度。爬升主要集中在第 2 分段（4.1km 爬升 480m，平均坡度 11.7%），最终 1.4km 下坡恢复。
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity filter section for the Activity Records tab -->
+  <div style="margin-top:10px;">
+    <h3 style="font-size:0.9rem;color:var(--text-muted);margin-bottom:14px;">活动记录 Tab — 筛选功能</h3>
+  </div>
+  <div class="card">
+    <div class="card-header">活动筛选</div>
+    <div class="card-body">
+      <div class="filter-bar">
+        <div class="field"><label>运动类型</label><select><option>全部</option><option>🥾 登山</option><option>🏃 跑步</option><option>🚴 骑行</option><option>🧘 其他</option></select></div>
+        <div class="field"><label>开始日期</label><input type="date"></div>
+        <div class="field"><label>结束日期</label><input type="date"></div>
+        <div class="field"><label>排序</label><select><option>时间降序</option><option>距离降序</option><option>时长降序</option></select></div>
+        <button class="btn btn-ghost">🔍 搜索</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
