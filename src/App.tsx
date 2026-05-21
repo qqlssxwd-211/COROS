@@ -21,7 +21,6 @@ function AppShell() {
   const [selectedActivity, setSelectedActivity] = useState<ActivitySummary | null>(null);
   const mapRef = useRef<TerrainMapHandle>(null);
 
-  // Today's stats
   const todayStats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
     let calories = 0;
@@ -42,6 +41,14 @@ function AppShell() {
     ? 'detail'
     : activeTab === 'overview' ? '' : activeTab;
 
+  const stats = [
+    { label: '2026 活动', value: String(summary.totalActivities), unit: '次' },
+    { label: '总距离', value: (summary.totalDistance / 1000).toFixed(0), unit: 'km' },
+    { label: '总时长', value: String(Math.floor(summary.totalDuration / 3600)), unit: 'h' },
+    { label: '今日消耗', value: todayStats.calories > 0 ? String(todayStats.calories) : '—', unit: 'kcal' },
+    { label: '今日步数', value: todayStats.steps > 0 ? String(todayStats.steps) : '—', unit: '步' },
+  ];
+
   return (
     <>
       <TerrainMap ref={mapRef} />
@@ -51,15 +58,23 @@ function AppShell() {
 
       {!showOverlay && (
         <>
-          <Hero year={2026} startMonth="1" endMonth="5" />
-          <StatsPanel stats={[
-            { label: '2026 活动', value: String(summary.totalActivities), unit: '次' },
-            { label: '总距离', value: (summary.totalDistance / 1000).toFixed(0), unit: 'km' },
-            { label: '总时长', value: String(Math.floor(summary.totalDuration / 3600)), unit: 'h' },
-            { label: '今日消耗', value: todayStats.calories > 0 ? String(todayStats.calories) : '—', unit: 'kcal' },
-            { label: '今日步数', value: todayStats.steps > 0 ? String(todayStats.steps) : '—', unit: '步' },
-          ]} />
-          <ActivityRail activities={activities} onSelect={setSelectedActivity} />
+          {/* Desktop layout */}
+          <div className="hidden md:block">
+            <Hero year={2026} startMonth="1" endMonth="5" />
+            <StatsPanel stats={stats} />
+            <ActivityRail activities={activities} onSelect={setSelectedActivity} />
+          </div>
+
+          {/* Mobile layout */}
+          <div className="md:hidden fixed top-14 left-0 right-0 bottom-0 z-20 flex flex-col pointer-events-none">
+            <div className="pointer-events-auto px-4 pt-1.5">
+              <Hero year={2026} startMonth="1" endMonth="5" mobile />
+            </div>
+            <div className="pointer-events-auto px-4 mt-auto pb-4">
+              <StatsPanel stats={stats} mobile />
+              <ActivityRail activities={activities} onSelect={setSelectedActivity} mobile />
+            </div>
+          </div>
         </>
       )}
 

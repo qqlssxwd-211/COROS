@@ -8,8 +8,6 @@ body {
   background: #000;
   color: #fafafa;
   overflow: hidden;
-  touch-action: pan-x pan-y;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Dark scrollbar - global */
