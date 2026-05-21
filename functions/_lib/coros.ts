@@ -1,4 +1,4 @@
-function md5(input: string): string {
+export function md5(input: string): string {
   function rotateLeft(n: number, s: number): number {
     return (n << s) | (n >>> (32 - s));
   }
