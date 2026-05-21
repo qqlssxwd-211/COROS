@@ -3,11 +3,18 @@ import { COROS_BASE_URLS } from '../_lib/coros';
 export async function onRequestGet({ request }: { request: Request }) {
   const accessToken = request.headers.get('accessToken') ?? '';
   const region = request.headers.get('region') ?? 'cn';
+  const userId = request.headers.get('x-user-id') ?? '';
   const baseUrl = COROS_BASE_URLS[region as keyof typeof COROS_BASE_URLS] ?? COROS_BASE_URLS.cn;
 
-  const res = await fetch(`${baseUrl}/analyse/dashboard`, {
-    headers: { 'accessToken': accessToken, 'Content-Type': 'application/json' },
-  });
+  const headers: Record<string, string> = {
+    'accessToken': accessToken,
+    'Content-Type': 'application/json',
+  };
+  if (userId) {
+    headers['yfheader'] = JSON.stringify({ userId });
+  }
+
+  const res = await fetch(`${baseUrl}/analyse/dashboard`, { headers });
 
   const data = await res.json();
   return new Response(JSON.stringify(data), {

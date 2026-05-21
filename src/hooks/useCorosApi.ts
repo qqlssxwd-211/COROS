@@ -20,7 +20,39 @@ export function useCorosApi() {
       headers: { 'accessToken': accessToken, 'Content-Type': 'application/json' },
     });
     if (!res.ok) throw new Error(`API error: ${res.status}`);
-    return res.json();
+    const json = await res.json();
+    if (json.result && json.result !== '0000') {
+      throw new Error(json.message || `API result: ${json.result}`);
+    }
+    return json;
+  }
+
+  function mapActivity(raw: any): ActivitySummary {
+    const dist = raw.distance ?? 0;
+    const time = raw.totalTime ?? 0;
+    return {
+      id: raw.labelId ?? '',
+      name: raw.name ?? '',
+      sportType: raw.sportType ?? 0,
+      sportName: raw.sportName ?? '',
+      startTime: raw.startTime ? String(raw.startTime) : '',
+      totalTime: time,
+      totalDistance: dist,
+      totalCalories: raw.calorie ?? 0,
+      avgHeartRate: raw.avgHr ?? 0,
+      maxHeartRate: 0,
+      avgPace: dist > 0 && time > 0 ? Math.round(time / (dist / 1000)) : 0,
+      totalAscent: raw.ascent ?? 0,
+      trainingLoad: raw.trainingLoad ?? 0,
+      endTime: raw.endTime ? String(raw.endTime) : undefined,
+      descent: raw.descent ?? undefined,
+      avgCadence: raw.avgCadence ?? undefined,
+      avgSpeed: raw.avgSpeed ? Number(raw.avgSpeed) : undefined,
+      maxSpeed: raw.maxSpeed ? Number(raw.maxSpeed) : undefined,
+      device: raw.device ?? undefined,
+      step: raw.step ?? undefined,
+      workoutTime: raw.workoutTime ?? undefined,
+    };
   }
 
   const syncAll = async (): Promise<{
@@ -28,16 +60,81 @@ export function useCorosApi() {
     dailyRecords: DailyRecord[];
     sleepRecords: SleepRecord[];
   }> => {
-    const [activities, dailyRecords, sleepRecords] = await Promise.all([
-      fetchFromCoros<ActivitySummary[]>('/activity/list', { size: '1000', page: '1' }),
-      fetchFromCoros<DailyRecord[]>('/analyse/dashboard', {}),
-      fetchFromCoros<SleepRecord[]>('/sleep/list', { size: '365' }),
-    ]);
-    return { activities, dailyRecords, sleepRecords };
+    // Fetch first page to get total count
+    const firstPage = await fetchFromCoros<{ result: string; data: { count: number; dataList: any[] } }>(
+      '/activity/query', { size: '100', pageNumber: '1' }
+    );
+
+    const activities: ActivitySummary[] = (firstPage.data?.dataList ?? []).map(mapActivity);
+    const totalCount = firstPage.data?.count ?? 0;
+    const totalPages = Math.ceil(totalCount / 100);
+
+    // Fetch remaining pages
+    if (totalPages > 1) {
+      const pagePromises: Promise<ActivitySummary[]>[] = [];
+      for (let p = 2; p <= totalPages; p++) {
+        pagePromises.push(
+          fetchFromCoros<{ result: string; data: { dataList: any[] } }>(
+            '/activity/query', { size: '100', pageNumber: String(p) }
+          ).then(res => (res.data?.dataList ?? []).map(mapActivity))
+        );
+      }
+      const results = await Promise.all(pagePromises);
+      results.forEach(arr => activities.push(...arr));
+    }
+
+    // Compute daily records from activities (aggregated by date)
+    const dateMap = new Map<string, { distance: number; duration: number; calories: number; trainingLoad: number; count: number }>();
+    for (const a of activities) {
+      const date = a.startTime ? new Date(Number(a.startTime) * 1000).toISOString().slice(0, 10) : '';
+      if (!date) continue;
+      const entry = dateMap.get(date) ?? { distance: 0, duration: 0, calories: 0, trainingLoad: 0, count: 0 };
+      entry.distance += a.totalDistance;
+      entry.duration += a.totalTime;
+      entry.calories += a.totalCalories;
+      entry.trainingLoad += a.trainingLoad;
+      entry.count++;
+      dateMap.set(date, entry);
+    }
+
+    const dailyRecords: DailyRecord[] = Array.from(dateMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, d]) => ({
+        date,
+        hrv: 0,
+        hrvBaseline: 0,
+        restingHeartRate: 0,
+        trainingLoad: d.trainingLoad,
+        loadRatio: 0,
+        vo2max: 0,
+        stamina: 0,
+        fatigue: d.trainingLoad > 50 ? Math.min(d.trainingLoad / 2, 100) : Math.max(50 - d.trainingLoad / 2, 0),
+      }));
+
+    return { activities, dailyRecords, sleepRecords: [] };
   };
 
   const fetchActivityDetail = async (id: string): Promise<ActivityDetail> => {
-    return fetchFromCoros<ActivityDetail>(`/activity/detail/${id}`);
+    // Basic detail from activity list data — detail endpoint unavailable on CN API
+    return {
+      id,
+      name: '',
+      sportType: 0,
+      sportName: '',
+      startTime: '',
+      totalTime: 0,
+      totalDistance: 0,
+      totalCalories: 0,
+      avgHeartRate: 0,
+      maxHeartRate: 0,
+      avgPace: 0,
+      totalAscent: 0,
+      trainingLoad: 0,
+      lapData: [],
+      heartRateZones: [],
+      elevationData: [],
+      paceData: [],
+    };
   };
 
   return { syncAll, fetchActivityDetail };

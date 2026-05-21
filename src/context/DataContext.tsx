@@ -8,6 +8,7 @@ interface DataState {
   sleepRecords: SleepRecord[];
   lastSync: Date | null;
   syncLoading: boolean;
+  syncError: string;
   syncData: () => Promise<void>;
   summary: DashboardSummary;
 }
@@ -20,16 +21,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [sleepRecords, setSleepRecords] = useState<SleepRecord[]>([]);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [syncLoading, setSyncLoading] = useState(false);
+  const [syncError, setSyncError] = useState('');
   const { syncAll } = useCorosApi();
 
   const syncData = useCallback(async () => {
     setSyncLoading(true);
+    setSyncError('');
     try {
       const data = await syncAll();
       setActivities(data.activities);
       setDailyRecords(data.dailyRecords);
       setSleepRecords(data.sleepRecords);
       setLastSync(new Date());
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '同步失败';
+      console.error('Sync error:', msg);
+      setSyncError(msg);
     } finally {
       setSyncLoading(false);
     }
@@ -45,7 +52,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <DataContext.Provider value={{ activities, dailyRecords, sleepRecords, lastSync, syncLoading, syncData, summary }}>
+    <DataContext.Provider value={{ activities, dailyRecords, sleepRecords, lastSync, syncLoading, syncError, syncData, summary }}>
       {children}
     </DataContext.Provider>
   );

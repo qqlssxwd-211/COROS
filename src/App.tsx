@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider, useData } from './context/DataContext';
 import LoginOverlay from './components/layout/LoginOverlay';
@@ -16,10 +16,25 @@ import type { ActivitySummary } from './types/coros';
 
 function AppShell() {
   const { isLoggedIn } = useAuth();
-  const { summary, activities, syncLoading, syncData } = useData();
+  const { summary, activities, syncLoading, syncError, syncData } = useData();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedActivity, setSelectedActivity] = useState<ActivitySummary | null>(null);
   const mapRef = useRef<TerrainMapHandle>(null);
+
+  // Today's stats
+  const todayStats = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    let calories = 0;
+    let steps = 0;
+    for (const a of activities) {
+      const d = new Date(Number(a.startTime) * 1000).toISOString().slice(0, 10);
+      if (d === today) {
+        calories += a.totalCalories;
+        steps += a.step ?? 0;
+      }
+    }
+    return { calories, steps };
+  }, [activities]);
 
   if (!isLoggedIn) return <LoginOverlay />;
 
@@ -32,7 +47,7 @@ function AppShell() {
       <TerrainMap ref={mapRef} />
 
       <NavBar activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setSelectedActivity(null); }}
-        onSync={syncData} syncLoading={syncLoading} mapRef={mapRef} />
+        onSync={syncData} syncLoading={syncLoading} syncError={syncError} mapRef={mapRef} />
 
       {!showOverlay && (
         <>
@@ -41,7 +56,8 @@ function AppShell() {
             { label: '2026 活动', value: String(summary.totalActivities), unit: '次' },
             { label: '总距离', value: (summary.totalDistance / 1000).toFixed(0), unit: 'km' },
             { label: '总时长', value: String(Math.floor(summary.totalDuration / 3600)), unit: 'h' },
-            { label: '总消耗', value: `${(summary.totalCalories / 1000).toFixed(1)}k`, unit: 'kcal' },
+            { label: '今日消耗', value: todayStats.calories > 0 ? String(todayStats.calories) : '—', unit: 'kcal' },
+            { label: '今日步数', value: todayStats.steps > 0 ? String(todayStats.steps) : '—', unit: '步' },
           ]} />
           <ActivityRail activities={activities} onSelect={setSelectedActivity} />
         </>

@@ -95,7 +95,7 @@ function md5(input: string): string {
 }
 
 export const COROS_BASE_URLS: Record<'cn' | 'eu' | 'us' | 'asia', string> = {
-  cn: 'https://teamapi.coros.com',
+  cn: 'https://teamcnapi.coros.com',
   eu: 'https://teameuapi.coros.com',
   us: 'https://teamusapi.coros.com',
   asia: 'https://teamapapi.coros.com',

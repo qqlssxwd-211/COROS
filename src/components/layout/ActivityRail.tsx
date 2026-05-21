@@ -12,8 +12,14 @@ function formatDuration(seconds: number): string {
   return h > 0 ? `${h}h ${m}min` : `${m}min`;
 }
 
+function formatDate(ts: string): string {
+  const d = new Date(Number(ts) * 1000);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
 export default function ActivityRail({ activities, onSelect }: Props) {
-  const recent = activities.slice(0, 5);
+  const sorted = [...activities].sort((a, b) => Number(b.startTime) - Number(a.startTime));
+  const recent = sorted.slice(0, 5);
 
   return (
     <div className="fixed right-6 bottom-8 z-20 flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
@@ -26,7 +32,7 @@ export default function ActivityRail({ activities, onSelect }: Props) {
             <div className="flex-1 min-w-0">
               <div className="text-[0.8rem] font-medium truncate">{a.name}</div>
               <div className="text-[0.68rem] text-[#666] mt-0.5 font-[family-name:var(--font-text)]">
-                {a.startTime.slice(5)} · {formatDuration(a.totalTime)}
+                {formatDate(a.startTime)} · {formatDuration(a.totalTime)}
               </div>
             </div>
             <span className="text-[0.78rem] text-[#666] font-[family-name:var(--font-text)] whitespace-nowrap">

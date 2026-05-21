@@ -38,15 +38,13 @@ export default function LoginOverlay() {
           <label className="block">
             <span className="text-[11px] uppercase tracking-[0.06em] text-[#666]">邮箱</span>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-white/8 bg-white/[0.07] px-4 py-2.5 text-[0.9rem] text-white placeholder:text-[#555] outline-none transition focus:border-accent focus:bg-white/[0.10]"
-              style={{ WebkitTextFillColor: '#fafafa' }}
+              className="mt-1 w-full rounded-xl border border-white/8 bg-white/[0.07] px-4 py-2.5 text-[0.9rem] text-white placeholder:text-[#555] outline-none transition focus:border-accent focus:bg-white/[0.10] [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgba(18,18,18,0.95)] [&:-webkit-autofill]:[-webkit-text-fill-color:#fafafa] [&:-webkit-autofill]:[caret-color:#fafafa]"
               placeholder="coros@example.com" required />
           </label>
           <label className="block">
             <span className="text-[11px] uppercase tracking-[0.06em] text-[#666]">密码</span>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-white/8 bg-white/[0.07] px-4 py-2.5 text-[0.9rem] text-white placeholder:text-[#555] outline-none transition focus:border-accent focus:bg-white/[0.10]"
-              style={{ WebkitTextFillColor: '#fafafa' }}
+              className="mt-1 w-full rounded-xl border border-white/8 bg-white/[0.07] px-4 py-2.5 text-[0.9rem] text-white placeholder:text-[#555] outline-none transition focus:border-accent focus:bg-white/[0.10] [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgba(18,18,18,0.95)] [&:-webkit-autofill]:[-webkit-text-fill-color:#fafafa] [&:-webkit-autofill]:[caret-color:#fafafa]"
               placeholder="••••••••" required />
           </label>
           <label className="block">

@@ -28,6 +28,15 @@ export interface ActivitySummary {
   avgPace: number;        // sec/km
   totalAscent: number;    // meters
   trainingLoad: number;
+  // Extended fields from API
+  endTime?: string;
+  descent?: number;
+  avgCadence?: number;
+  avgSpeed?: number;
+  maxSpeed?: number;
+  device?: string;
+  step?: number;
+  workoutTime?: number;
 }
 
 export interface ActivityDetail extends ActivitySummary {

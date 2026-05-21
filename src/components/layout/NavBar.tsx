@@ -6,6 +6,7 @@ interface Props {
   onTabChange: (tab: string) => void;
   onSync: () => void;
   syncLoading: boolean;
+  syncError: string;
   mapRef: React.RefObject<TerrainMapHandle>;
 }
 
@@ -17,7 +18,7 @@ const TABS = [
   { id: 'activities', label: '活动' },
 ];
 
-export default function NavBar({ activeTab, onTabChange, onSync, syncLoading, mapRef }: Props) {
+export default function NavBar({ activeTab, onTabChange, onSync, syncLoading, syncError, mapRef }: Props) {
   const { userName, logout } = useAuth();
 
   return (
@@ -39,13 +40,14 @@ export default function NavBar({ activeTab, onTabChange, onSync, syncLoading, ma
 
       <div className="flex items-center gap-3">
         <button onClick={() => mapRef.current?.resetView()}
-          className="rounded-3xl border border-accent px-4 py-2 text-[0.82rem] font-semibold text-accent transition hover:bg-accent/10">
+          className="rounded-3xl bg-white/10 px-5 py-2 text-[0.82rem] font-semibold text-[#fafafa] transition hover:bg-white/15">
           轨迹视角
         </button>
         <button onClick={onSync} disabled={syncLoading}
           className="rounded-3xl bg-accent px-5 py-2 text-[0.82rem] font-semibold text-black transition hover:bg-accent-hover disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black">
-          {syncLoading ? '同步中...' : '同步数据'}
+          {syncLoading ? '同步中...' : syncError ? '重试同步' : '同步数据'}
         </button>
+        {syncError && <span className="text-[0.7rem] text-red-400 max-w-[160px] truncate" title={syncError}>{syncError}</span>}
         <span className="rounded-[20px] border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.92)] px-3.5 py-1.5 text-[0.78rem] text-[#999] backdrop-blur-md">
           {userName}
         </span>

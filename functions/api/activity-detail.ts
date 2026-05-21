@@ -1,14 +1,24 @@
 import { COROS_BASE_URLS } from '../_lib/coros';
 
-export async function onRequestGet({ request }: { request: Request }) {
+export async function onRequestPost({ request }: { request: Request }) {
   const accessToken = request.headers.get('accessToken') ?? '';
   const region = request.headers.get('region') ?? 'cn';
+  const userId = request.headers.get('x-user-id') ?? '';
   const baseUrl = COROS_BASE_URLS[region as keyof typeof COROS_BASE_URLS] ?? COROS_BASE_URLS.cn;
-  const url = new URL(request.url);
-  const id = url.pathname.split('/').pop();
 
-  const res = await fetch(`${baseUrl}/activity/detail/${id}`, {
-    headers: { 'accessToken': accessToken, 'Content-Type': 'application/json' },
+  const body = await request.json() as { activityId?: string };
+  const headers: Record<string, string> = {
+    'accessToken': accessToken,
+    'Content-Type': 'application/json',
+  };
+  if (userId) {
+    headers['yfheader'] = JSON.stringify({ userId });
+  }
+
+  const res = await fetch(`${baseUrl}/activity/detail/query`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ activityId: body.activityId }),
   });
 
   const data = await res.json();
