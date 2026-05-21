@@ -9,7 +9,7 @@ function getApiBase(region: string): string {
   return (REGION_BASE_URL as Record<string, string>)[region] ?? REGION_BASE_URL.cn;
 }
 
-export async function loginCoros(credentials: CorosCredentials): Promise<{ accessToken: string; userId: string }> {
+export async function loginCoros(credentials: CorosCredentials): Promise<{ accessToken: string; userId: string; nickname: string }> {
   const baseUrl = getApiBase(credentials.region);
   const passwordHash = md5(credentials.password);
   const url = `${baseUrl}/account/login`;
@@ -19,7 +19,7 @@ export async function loginCoros(credentials: CorosCredentials): Promise<{ acces
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       account: credentials.email,
-      password: passwordHash,
+      pwd: passwordHash,
       accountType: 2,
     }),
   });
@@ -29,15 +29,16 @@ export async function loginCoros(credentials: CorosCredentials): Promise<{ acces
     throw new Error(`Login failed: ${res.status} ${text}`);
   }
 
-  const data = await res.json();
-  if (data.result !== '0000') {
-    throw new Error(data.message || `Login failed, result: ${data.result}`);
+  const body = await res.json();
+  if (body.result !== '0000') {
+    throw new Error(body.message || `Login failed, result: ${body.result}`);
   }
-  if (!data.accessToken || !data.userId) {
+  const inner = body.data;
+  if (!inner?.accessToken || !inner?.userId) {
     throw new Error('Login response missing required fields');
   }
 
-  return { accessToken: data.accessToken, userId: data.userId };
+  return { accessToken: inner.accessToken, userId: inner.userId, nickname: inner.nickname || credentials.email };
 }
 
 export function buildCorosRequest(baseUrl: string, accessToken: string, endpoint: string, params?: Record<string, string>) {

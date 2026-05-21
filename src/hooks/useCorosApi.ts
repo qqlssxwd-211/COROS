@@ -29,15 +29,15 @@ export function useCorosApi() {
     sleepRecords: SleepRecord[];
   }> => {
     const [activities, dailyRecords, sleepRecords] = await Promise.all([
-      fetchFromCoros<ActivitySummary[]>('/api/v1/activity/list', { size: '1000' }),
-      fetchFromCoros<DailyRecord[]>('/api/v1/analyse/dashboard', {}),
-      fetchFromCoros<SleepRecord[]>('/api/v1/sleep/list', { size: '365' }),
+      fetchFromCoros<ActivitySummary[]>('/activity/list', { size: '1000', page: '1' }),
+      fetchFromCoros<DailyRecord[]>('/analyse/dashboard', {}),
+      fetchFromCoros<SleepRecord[]>('/sleep/list', { size: '365' }),
     ]);
     return { activities, dailyRecords, sleepRecords };
   };
 
   const fetchActivityDetail = async (id: string): Promise<ActivityDetail> => {
-    return fetchFromCoros<ActivityDetail>(`/api/v1/activity/detail/${id}`);
+    return fetchFromCoros<ActivityDetail>(`/activity/detail/${id}`);
   };
 
   return { syncAll, fetchActivityDetail };

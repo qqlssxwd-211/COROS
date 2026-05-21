@@ -1,12 +1,12 @@
 import { COROS_BASE_URLS } from '../_lib/coros';
 
 export async function onRequestGet({ request }: { request: Request }) {
-  const accessToken = request.headers.get('accessToken');
+  const accessToken = request.headers.get('accessToken') ?? '';
   const region = request.headers.get('region') ?? 'cn';
   const baseUrl = COROS_BASE_URLS[region as keyof typeof COROS_BASE_URLS] ?? COROS_BASE_URLS.cn;
 
-  const res = await fetch(`${baseUrl}/api/v1/analyse/dashboard`, {
-    headers: { 'accessToken': accessToken!, 'Content-Type': 'application/json' },
+  const res = await fetch(`${baseUrl}/analyse/dashboard`, {
+    headers: { 'accessToken': accessToken, 'Content-Type': 'application/json' },
   });
 
   const data = await res.json();

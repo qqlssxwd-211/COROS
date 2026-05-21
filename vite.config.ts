@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api/coros/cn': {
-        target: 'https://teamcnapi.coros.com',
+        target: 'https://teamapi.coros.com',
         changeOrigin: true,
         rewrite: (path: string) => path.replace(/^\/api\/coros\/cn/, ''),
       },

@@ -28,7 +28,7 @@ export const REGION_OPTIONS = [
 ];
 
 export const REGION_BASE_URL: Record<Region, string> = {
-  cn: 'https://teamcnapi.coros.com',
+  cn: 'https://teamapi.coros.com',
   eu: 'https://teameuapi.coros.com',
   us: 'https://teamusapi.coros.com',
   asia: 'https://teamapapi.coros.com',

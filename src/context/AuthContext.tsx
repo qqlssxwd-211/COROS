@@ -19,11 +19,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const login = useCallback(async (creds: CorosCredentials) => {
-    const { accessToken, userId } = await loginCoros(creds);
+    const { accessToken, userId, nickname } = await loginCoros(creds);
     setState({
       accessToken,
       userId,
-      userName: creds.email,
+      userName: nickname,
       region: creds.region,
       isLoggedIn: true,
     });

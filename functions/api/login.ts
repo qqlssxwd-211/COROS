@@ -8,15 +8,16 @@ export async function onRequestPost({ request }: { request: Request }) {
   const res = await fetch(`${baseUrl}/account/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ account: email, password: hash, accountType: 2 }),
+    body: JSON.stringify({ account: email, pwd: hash, accountType: 2 }),
   });
 
   if (!res.ok) return new Response(JSON.stringify({ error: 'login failed' }), { status: 401 });
-  const data = await res.json() as Record<string, unknown>;
-  if (data.result !== '0000') {
-    return new Response(JSON.stringify({ error: data.message || `Login failed (${data.result})` }), { status: 401 });
+  const body = await res.json() as Record<string, unknown>;
+  if (body.result !== '0000') {
+    return new Response(JSON.stringify({ error: body.message || `Login failed (${body.result})` }), { status: 401 });
   }
-  return new Response(JSON.stringify({ accessToken: data.accessToken, userId: data.userId }), {
+  const inner = body.data as Record<string, unknown> | undefined;
+  return new Response(JSON.stringify({ accessToken: inner?.accessToken, userId: inner?.userId }), {
     headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
   });
 }
