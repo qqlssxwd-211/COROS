@@ -15,11 +15,11 @@ export default function BodyTab({ active, onClose }: Props) {
 
   return (
     <TabShell active={active} onClose={onClose} title="身体数据">
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
         <MetricCard title="HRV 趋势" chart={<LineChart data={sorted.slice(0, 30).reverse().map(d => ({ x: d.date.slice(5), y: d.hrv }))} />} />
         <MetricCard title="静息心率" chart={<LineChart data={sorted.slice(0, 30).reverse().map(d => ({ x: d.date.slice(5), y: d.restingHeartRate }))} color="#38bdf8" />} />
       </div>
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
         <MetricCard title="训练负荷" chart={<LineChart data={sorted.slice(0, 30).reverse().map(d => ({ x: d.date.slice(5), y: d.trainingLoad }))} color="#facc15" />} />
         <MetricCard title="VO2max" chart={<LineChart data={sorted.slice(0, 30).reverse().map(d => ({ x: d.date.slice(5), y: d.vo2max }))} color="#c084fc" />} />
       </div>

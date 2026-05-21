@@ -72,11 +72,11 @@ export default function TrendTab({ active, onClose }: Props) {
       <FilterBar sportType={sportType} onSportChange={setSportType} dateFrom={dateFrom} onDateFromChange={setDateFrom}
         dateTo={dateTo} onDateToChange={setDateTo} onSearch={handleSearch} onReset={handleReset} />
       <div className="mt-1 text-[0.68rem] text-[#555]">显示 {filtered.length} 条活动</div>
-      <div className="grid grid-cols-2 gap-3 mt-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
         <MetricCard title="每周距离趋势 (km)" chart={<BarChart data={weeks.map(w => ({ x: w.week, y: w.distance }))} />} />
         <MetricCard title="每周时长趋势 (h)" chart={<AreaChart data={weeks.map(w => ({ x: w.week, y: w.duration }))} area />} />
       </div>
-      <div className="grid grid-cols-2 gap-3 mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
         <MetricCard title="训练负荷趋势" chart={<LineChart data={weeks.map(w => ({ x: w.week, y: w.load }))} />} />
         <MetricCard title="活动次数" chart={<BarChart data={weeks.map(w => ({ x: w.week, y: w.count }))} color="#38bdf8" />} />
       </div>

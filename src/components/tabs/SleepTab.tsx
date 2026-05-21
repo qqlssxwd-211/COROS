@@ -22,11 +22,11 @@ export default function SleepTab({ active, onClose }: Props) {
 
   return (
     <TabShell active={active} onClose={onClose} title="睡眠数据">
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
         <MetricCard title="睡眠阶段分布" chart={<PieChart data={phaseData} />} />
         <MetricCard title="睡眠质量趋势" chart={<LineChart data={sorted.slice(0, 30).reverse().map(d => ({ x: d.date.slice(5), y: d.qualityScore }))} />} />
       </div>
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
         <MetricCard title="睡眠时长 (min)" chart={<BarChart data={sorted.slice(0, 14).reverse().map(d => ({ x: d.date.slice(5), y: d.totalDuration }))} color="#38bdf8" />} />
         <MetricCard title="平均心率" chart={<LineChart data={sorted.slice(0, 14).reverse().map(d => ({ x: d.date.slice(5), y: d.avgHeartRate }))} color="#f97316" />} />
       </div>

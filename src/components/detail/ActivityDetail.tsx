@@ -25,8 +25,8 @@ function fmtDate(ts: string) {
 
 function MetricBlock({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-center">
-      <div className="text-xl font-medium text-[#fafafa]">{value}<span className="text-[0.7rem] text-[#666] ml-0.5">{unit}</span></div>
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-3 md:p-4 text-center">
+      <div className="text-lg md:text-xl font-medium text-[#fafafa]">{value}<span className="text-[0.7rem] text-[#666] ml-0.5">{unit}</span></div>
       <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666] mt-1">{label}</div>
     </div>
   );
@@ -50,7 +50,7 @@ export default function ActivityDetail({ activity, onClose }: Props) {
       </div>
 
       {/* Primary metrics */}
-      <div className="grid grid-cols-6 gap-3 mb-3">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3 mb-2 md:mb-3">
         <MetricBlock label="距离" value={(activity.totalDistance / 1000).toFixed(2)} unit="km" />
         <MetricBlock label="时长" value={fmtTime(activity.totalTime)} unit="" />
         <MetricBlock label="配速" value={fmtPace(activity.avgPace)} unit="/km" />
@@ -60,7 +60,7 @@ export default function ActivityDetail({ activity, onClose }: Props) {
       </div>
 
       {/* Secondary metrics */}
-      <div className="grid grid-cols-6 gap-3 mb-5">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3 mb-4 md:mb-5">
         <MetricBlock label="爬升" value={activity.totalAscent > 0 ? String(activity.totalAscent) : '—'} unit="m" />
         <MetricBlock label="下降" value={activity.descent ? String(activity.descent) : '—'} unit="m" />
         <MetricBlock label="步频" value={activity.avgCadence ? String(activity.avgCadence) : '—'} unit="spm" />
@@ -73,7 +73,7 @@ export default function ActivityDetail({ activity, onClose }: Props) {
       {activity.endTime && (
         <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 mb-4">
           <div className="text-[0.7rem] uppercase tracking-[0.06em] text-[#666] mb-3">时间详情</div>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <div>
               <div className="text-[0.68rem] text-[#666] mb-0.5">开始时间</div>
               <div className="text-[0.85rem] text-[#e0e0e0]">{fmtDate(activity.startTime)}</div>
