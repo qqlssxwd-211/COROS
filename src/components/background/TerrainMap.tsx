@@ -51,10 +51,9 @@ const TerrainMap = forwardRef<TerrainMapHandle>(function TerrainMap(_props, ref)
     });
     mapRef.current = map;
 
-    map.on('mousedown', () => { interacting.current.active = true; });
-    map.on('mouseup', () => { interacting.current.last = performance.now(); interacting.current.active = false; });
-    map.on('touchstart', () => { interacting.current.active = true; });
-    map.on('touchend', () => { interacting.current.last = performance.now(); interacting.current.active = false; });
+    map.on('movestart', (e) => { if (e.originalEvent) { interacting.current.active = true; } });
+    map.on('moveend', (e) => { if (e.originalEvent) { interacting.current.last = performance.now(); interacting.current.active = false; } });
+    map.on('mouseleave', () => { interacting.current.active = false; });
 
     map.on('load', () => {
       // Trail 1 (green)
@@ -80,12 +79,12 @@ const TerrainMap = forwardRef<TerrainMapHandle>(function TerrainMap(_props, ref)
         const elapsed = (now - start) / 1000;
         const { active, last } = interacting.current;
         if (!active && now - last > 5000) {
-          map.rotateTo((INITIAL_MAP_VIEW.bearing + elapsed * 1.2) % 360, { duration: 0 });
+          map.setBearing((INITIAL_MAP_VIEW.bearing + elapsed * 1.2) % 360);
           map.setPitch(52 + Math.sin(elapsed * 0.10) * 10);
         }
 
-        dotOffsets.current[0] = (dotOffsets.current[0] + 0.00008) % 1;
-        dotOffsets.current[1] = (dotOffsets.current[1] + 0.00010) % 1;
+        dotOffsets.current[0] = (elapsed * 0.0048) % 1;
+        dotOffsets.current[1] = (elapsed * 0.0060) % 1;
 
         [TRAIL_1_COORDS, TRAIL_2_COORDS].forEach((trail, i) => {
           const t = dotOffsets.current[i] * (trail.length - 1);
