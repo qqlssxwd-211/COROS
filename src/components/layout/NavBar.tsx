@@ -14,6 +14,7 @@ const TABS = [
   { id: 'activities', label: '活动' },
   { id: 'overview', label: '概览' },
   { id: 'trend', label: '趋势' },
+  { id: 'analysis', label: '分析' },
   { id: 'body', label: '身体' },
   { id: 'sleep', label: '睡眠' },
 ];
