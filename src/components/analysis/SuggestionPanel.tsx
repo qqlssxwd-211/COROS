@@ -1,0 +1,138 @@
+import { useMemo, useState, useCallback } from 'react';
+import { useData } from '../../context/DataContext';
+import {
+  aggregateDailyLoads, calcACWR, calcEfficiencyIndex, calcSportDistribution,
+  generateWeeklySuggestion, getStatusSummary,
+} from '../../lib/analysis';
+
+export default function SuggestionPanel() {
+  const { activities } = useData();
+
+  const [goalType, setGoalType] = useState<'monthlyDist' | 'race10k' | ''>('');
+  const [goalValue, setGoalValue] = useState('');
+  const [goalSet, setGoalSet] = useState(false);
+
+  const dailyLoads = useMemo(() => aggregateDailyLoads(activities), [activities]);
+  const acwrData = useMemo(() => calcACWR(dailyLoads), [dailyLoads]);
+  const latestACWR = acwrData.length > 0 ? acwrData[acwrData.length - 1]?.ratio ?? 0 : 0;
+  const efficiency = useMemo(() => calcEfficiencyIndex(activities), [activities]);
+
+  const recentFreq = useMemo(() => {
+    const now = Math.floor(Date.now() / 1000);
+    const fourWeeksAgo = now - 28 * 86400;
+    return Math.round(activities.filter(a => Number(a.startTime) >= fourWeeksAgo).length / 4);
+  }, [activities]);
+
+  const suggestion = useMemo(() => generateWeeklySuggestion(activities, latestACWR), [activities, latestACWR]);
+  const status = useMemo(() => getStatusSummary(efficiency, latestACWR, recentFreq), [efficiency, latestACWR, recentFreq]);
+  const sportDist = useMemo(() => calcSportDistribution(activities), [activities]);
+
+  const dominantSport = Object.entries(sportDist).sort((a, b) => b[1].percent - a[1].percent)[0];
+
+  const handleSetGoal = useCallback(() => {
+    if (goalType && goalValue) setGoalSet(true);
+  }, [goalType, goalValue]);
+
+  if (activities.length < 5) {
+    return (
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
+        <div className="text-[#666] text-sm">数据不足，至少需要 5 条活动才能提供建议</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className={`rounded-2xl border p-5 ${
+        status.status === 'improving' ? 'border-green-500/20 bg-green-500/[0.03]' :
+        status.status === 'declining' || status.status === 'insufficient' ? 'border-red-500/20 bg-red-500/[0.03]' :
+        'border-white/5 bg-white/[0.02]'
+      }`}>
+        <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">当前状态</div>
+        <div className="text-xl font-medium text-[#fafafa] mt-1">{status.label}</div>
+        <div className="text-[0.72rem] text-[#888] mt-1.5 leading-relaxed">{status.detail}</div>
+      </div>
+
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+        <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666] mb-3">下周训练建议</div>
+        <div className="grid grid-cols-2 gap-3 text-center">
+          <div>
+            <div className="text-[0.62rem] text-[#666]">目标距离</div>
+            <div className="text-lg font-medium text-[#fafafa]">{suggestion.targetDistance}<span className="text-[0.7rem] text-[#666] ml-0.5">km</span></div>
+          </div>
+          <div>
+            <div className="text-[0.62rem] text-[#666]">运动频次</div>
+            <div className="text-lg font-medium text-[#fafafa]">{suggestion.targetFrequency}<span className="text-[0.7rem] text-[#666] ml-0.5">次/周</span></div>
+          </div>
+          <div>
+            <div className="text-[0.62rem] text-[#666]">轻松跑</div>
+            <div className="text-lg font-medium text-[#4ade80]">{suggestion.easyPercent}%</div>
+          </div>
+          <div>
+            <div className="text-[0.62rem] text-[#666]">强度跑</div>
+            <div className="text-lg font-medium text-[#facc15]">{suggestion.intensityPercent}%</div>
+          </div>
+        </div>
+        {suggestion.note && (
+          <div className="mt-3 text-center text-[0.7rem] text-[#888] bg-white/[0.02] rounded-xl py-2 px-3">
+            {suggestion.note}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+        <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666] mb-3">目标设定</div>
+        {!goalSet ? (
+          <div className="space-y-3">
+            <select value={goalType} onChange={e => setGoalType(e.target.value as typeof goalType)}
+              className="w-full rounded-xl border border-white/10 bg-black/30 text-[#fafafa] text-sm px-3 py-2 focus:outline-none focus:border-accent/50">
+              <option value="">选择目标类型</option>
+              <option value="monthlyDist">月跑量目标</option>
+              <option value="race10k">10K 成绩目标</option>
+            </select>
+            {goalType && (
+              <input type="number" value={goalValue} onChange={e => setGoalValue(e.target.value)}
+                placeholder={goalType === 'monthlyDist' ? '目标月跑量 (km)' : '目标完赛时间 (分钟)'}
+                className="w-full rounded-xl border border-white/10 bg-black/30 text-[#fafafa] text-sm px-3 py-2 focus:outline-none focus:border-accent/50" />
+            )}
+            {goalType && goalValue && (
+              <button onClick={handleSetGoal}
+                className="w-full rounded-xl bg-accent text-black font-semibold text-sm py-2 hover:bg-accent-hover transition">
+                设定目标
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="text-center">
+            <div className="text-[0.72rem] text-[#888]">当前目标</div>
+            <div className="text-lg font-medium text-[#fafafa] mt-1">
+              {goalType === 'monthlyDist' ? `月跑量 ${goalValue}km` : `10K ${goalValue}分钟`}
+            </div>
+            <div className="mt-2 h-2 rounded-full bg-white/5 overflow-hidden">
+              <div className="h-full rounded-full bg-accent transition-all" style={{ width: '0%' }} />
+            </div>
+            <div className="text-[0.65rem] text-[#555] mt-1">开始追踪中，数据积累后显示进度</div>
+            <button onClick={() => setGoalSet(false)}
+              className="mt-3 text-[0.7rem] text-[#666] hover:text-[#999]">重置目标</button>
+          </div>
+        )}
+      </div>
+
+      {dominantSport && dominantSport[1].percent > 90 && (
+        <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/[0.03] p-5 text-center">
+          <div className="text-[0.72rem] text-[#facc15]">
+            你的 {dominantSport[1].name === 'running' ? '跑步' :
+                    dominantSport[1].name === 'hiking' ? '登山' :
+                    dominantSport[1].name === 'cycling' ? '骑行' :
+                    dominantSport[1].name === 'swimming' ? '游泳' : '力量训练'} 占比超过 90%
+          </div>
+          <div className="text-[0.68rem] text-[#888] mt-1">
+            建议加入{dominantSport[1].name === 'running' ? '力量训练和骑行' :
+                             dominantSport[1].name === 'cycling' ? '跑步和力量训练' :
+                             dominantSport[1].name === 'hiking' ? '跑步和力量训练' : '跑步和骑行'}，多样化训练更有利于全面发展
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
