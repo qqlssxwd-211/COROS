@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import TabShell from '../tabs/TabShell';
 import { SPORT_MAP } from '../../lib/constants';
 import type { ActivitySummary } from '../../types/coros';
@@ -39,6 +40,7 @@ function MetricBlock({ label, value, unit, highlight }: { label: string; value: 
 }
 
 export default function ActivityDetail({ activity, onClose }: Props) {
+  const [imgFull, setImgFull] = useState(false);
   if (!activity) return null;
   const sport = SPORT_MAP[activity.sportType] ?? { name: '未知运动', color: '#666' };
   const st = activity.sportType;
@@ -81,10 +83,47 @@ export default function ActivityDetail({ activity, onClose }: Props) {
 
       {/* Route image from COROS */}
       {activity.imageUrl && (
-        <div className="mb-5 rounded-2xl overflow-hidden border border-white/8">
-          <img src={activity.imageUrl} alt="活动路线" className="w-full h-48 md:h-64 object-cover" loading="lazy" />
-          <div className="bg-white/[0.02] px-4 py-2 text-[0.68rem] text-[#555]">活动路线图</div>
-        </div>
+        <>
+          <div className="mb-5 rounded-2xl overflow-hidden border border-white/8 bg-[#0a0a0a] group relative">
+            <img
+              src={activity.imageUrl}
+              alt="活动路线"
+              className="w-full h-56 md:h-80 object-contain bg-black/80"
+              loading="lazy"
+            />
+            {/* Bottom bar */}
+            <div className="flex items-center justify-between bg-white/[0.02] px-4 py-2">
+              <span className="text-[0.68rem] text-[#555]">活动路线图</span>
+              <button
+                onClick={() => setImgFull(true)}
+                className="text-[0.68rem] text-accent hover:text-accent-hover transition"
+              >
+                查看大图
+              </button>
+            </div>
+          </div>
+
+          {/* Fullscreen image viewer */}
+          {imgFull && (
+            <div
+              className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+              onClick={() => setImgFull(false)}
+            >
+              <button
+                onClick={() => setImgFull(false)}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition z-10"
+              >
+                ✕
+              </button>
+              <img
+                src={activity.imageUrl}
+                alt="活动路线大图"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                onClick={e => e.stopPropagation()}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {/* Primary metrics */}
