@@ -4,6 +4,7 @@ import {
   aggregateDailyLoads, calcACWR, calcEfficiencyIndex, calcSportDistribution,
   generateWeeklySuggestion, getStatusSummary,
 } from '../../lib/analysis';
+import InfoTip from '../ui/InfoTip';
 
 export default function SuggestionPanel() {
   const { activities } = useData();
@@ -37,18 +38,33 @@ export default function SuggestionPanel() {
 
   return hasData ? (
     <div className="space-y-4">
+      {/* 当前状态 */}
       <div className={`rounded-2xl border p-5 ${
         status.status === 'improving' ? 'border-green-500/20 bg-green-500/[0.03]' :
         status.status === 'declining' || status.status === 'insufficient' ? 'border-red-500/20 bg-red-500/[0.03]' :
         'border-white/5 bg-white/[0.02]'
       }`}>
-        <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">当前状态</div>
+        <div className="flex items-center gap-1">
+          <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">当前状态</div>
+          <InfoTip term="综合训练状态">
+            综合评估 ACWR 负荷比、配速-心率效率指数趋势和训练频率。
+            效率上升 + 负荷合理 = 状态提升；效率下降 = 可能疲劳或训练不当；负荷过高 = 受伤风险增加。
+          </InfoTip>
+        </div>
         <div className="text-xl font-medium text-[#fafafa] mt-1">{status.label}</div>
         <div className="text-[0.72rem] text-[#888] mt-1.5 leading-relaxed">{status.detail}</div>
       </div>
 
+      {/* 下周训练建议 */}
       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
-        <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666] mb-3">下周训练建议</div>
+        <div className="flex items-center gap-1 mb-3">
+          <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">下周训练建议</div>
+          <InfoTip term="训练建议">
+            基于近4周训练数据和当前 ACWR 自动生成。遵循 80/20 训练原则：80% 低强度有氧跑 +
+            20% 中高强度训练，平衡训练效果与恢复，降低受伤风险。
+          </InfoTip>
+        </div>
+
         <div className="grid grid-cols-2 gap-3 text-center">
           <div>
             <div className="text-[0.62rem] text-[#666]">目标距离</div>
@@ -67,15 +83,49 @@ export default function SuggestionPanel() {
             <div className="text-lg font-medium text-[#facc15]">{suggestion.intensityPercent}%</div>
           </div>
         </div>
+
         {suggestion.note && (
-          <div className="mt-3 text-center text-[0.7rem] text-[#888] bg-white/[0.02] rounded-xl py-2 px-3">
+          <div className="mt-3 text-center text-[0.7rem] text-accent/80 bg-accent/[0.06] rounded-xl py-2 px-3 font-medium">
             {suggestion.note}
           </div>
         )}
       </div>
 
+      {/* 每周详细计划 */}
       <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
-        <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666] mb-3">目标设定</div>
+        <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666] mb-3">周训练安排</div>
+        <ul className="space-y-2">
+          {suggestion.weeklyPlan.map((item, i) => (
+            <li key={i} className="flex gap-2 text-[0.72rem] text-[#bbb] leading-relaxed">
+              <span className="text-[0.65rem] text-[#555] mt-0.5 shrink-0">●</span>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* 注意事项 */}
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+        <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666] mb-3">关键提醒</div>
+        <ul className="space-y-2">
+          {suggestion.tips.map((tip, i) => (
+            <li key={i} className="flex gap-2 text-[0.72rem] text-[#bbb] leading-relaxed">
+              <span className="text-[0.65rem] text-[#facc15] mt-0.5 shrink-0">◆</span>
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* 目标设定 */}
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+        <div className="flex items-center gap-1 mb-3">
+          <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">目标设定</div>
+          <InfoTip term="目标追踪">
+            设定明确目标可以让训练更有方向。月跑量目标适合储备期，10K 成绩目标适合备赛期。
+            数据累积后会自动显示进度条，帮你追踪完成情况。
+          </InfoTip>
+        </div>
         {!goalSet ? (
           <div className="space-y-3">
             <select value={goalType} onChange={e => setGoalType(e.target.value as typeof goalType)}
@@ -112,6 +162,7 @@ export default function SuggestionPanel() {
         )}
       </div>
 
+      {/* 交叉训练建议 */}
       {dominantSport && dominantSport[1].percent > 90 && (
         <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/[0.03] p-5 text-center">
           <div className="text-[0.72rem] text-[#facc15]">

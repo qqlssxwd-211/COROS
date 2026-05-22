@@ -206,6 +206,8 @@ interface WeeklySuggestion {
   easyPercent: number;
   intensityPercent: number;
   note: string;
+  weeklyPlan: string[];
+  tips: string[];
 }
 
 export function generateWeeklySuggestion(activities: ActivitySummary[], acwr: number): WeeklySuggestion {
@@ -217,16 +219,56 @@ export function generateWeeklySuggestion(activities: ActivitySummary[], acwr: nu
   const weeklyFreq = Math.round(recent.length / 4);
 
   const reduction = acwr > 1.5 ? 0.7 : acwr > 1.3 ? 0.85 : 1.0;
+  const targetDist = Math.round(weeklyDist * Math.min(1.1, 1.0 / reduction) * 10) / 10;
+  const targetFreq = Math.max(3, weeklyFreq + (acwr > 1.3 ? -1 : 1));
+
+  const easyDist = Math.round(targetDist * 0.8 * 10) / 10;
+  const hardDist = Math.round(targetDist * 0.2 * 10) / 10;
+  const easyPerSession = Math.round(easyDist / Math.max(1, targetFreq - 1) * 10) / 10;
+  const intensitySessions = Math.max(1, Math.round(targetFreq / 4));
+
+  const weeklyPlan = [
+    `轻松跑 ${targetFreq - intensitySessions} 次，每次约 ${easyPerSession}km，心率维持在 Zone2（能正常对话的强度）`,
+    `强度训练 ${intensitySessions} 次（可选节奏跑、间歇跑或法特莱克），每次含热身和放松`,
+    `每周安排 1-2 天完全休息或交叉训练（游泳、骑行、力量训练）`,
+    `长距离跑安排在周末，距离为周总跑量的 25-30%（约 ${Math.round(targetDist * 0.3)}km）`,
+  ];
+
+  const tips = acwr > 1.5 ? [
+    '当前 ACWR 偏高，进入减量周：跑量降至正常的 70%',
+    '优先保证睡眠质量，每天至少 7-8 小时',
+    '注意身体信号：持续酸痛、静息心率升高都是过度训练的预警',
+    '多摄入蛋白质和抗氧化物，帮助肌肉修复',
+  ] : acwr > 1.3 ? [
+    '负荷略高，适当降低强度训练次数',
+    '增加轻松跑和恢复跑的比例，让身体有时间适应',
+    '关注接下来两周的 ACWR 趋势，若继续上升应立即减量',
+  ] : acwr < 0.5 ? [
+    '当前训练量偏低，可以逐步增加（每周增量不超过 10%）',
+    '先增加训练频次，再增加单次距离',
+    '设定一个短期目标（如 4 周后完成一次 10K 测试跑）',
+    '交叉训练（力量、核心）可有效提升跑步经济性',
+  ] : [
+    '维持当前训练节奏，每周增加跑量不超过 10%',
+    '每 3-4 周安排一个减量周（跑量降至 60-70%），帮助身体超量恢复',
+    '尝试在强度课中变换训练形式：节奏跑、间歇跑、爬坡跑交替',
+    '记录每次训练后的主观感受（RPE），结合数据调整计划',
+  ];
+
+  let note = '';
+  if (acwr > 1.5) note = '负荷偏高，建议本周减量 30%，以恢复跑为主';
+  else if (acwr > 1.3) note = '负荷略高，建议本周减量 15%，减少一次强度课';
+  else if (acwr < 0.5) note = '可适度增加训练量，每周增量不超过 10%';
+  else note = '维持当前训练量，渐进增加不超过 10%';
 
   return {
-    targetDistance: Math.round(weeklyDist * Math.min(1.1, 1.0 / reduction) * 10) / 10,
-    targetFrequency: Math.max(3, weeklyFreq + (acwr > 1.3 ? -1 : 1)),
+    targetDistance: targetDist,
+    targetFrequency: targetFreq,
     easyPercent: 80,
     intensityPercent: 20,
-    note: acwr > 1.5 ? '负荷偏高，建议本周减量30%' :
-          acwr > 1.3 ? '负荷略高，建议本周减量15%' :
-          acwr < 0.5 ? '可适度增加训练量（不超过10%）' :
-          '维持当前训练量，渐进增加不超过10%',
+    note,
+    weeklyPlan,
+    tips,
   };
 }
 

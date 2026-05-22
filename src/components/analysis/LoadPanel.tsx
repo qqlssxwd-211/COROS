@@ -6,6 +6,7 @@ import {
 } from '../../lib/analysis';
 import { LineChart, AreaChart, PieChart } from '../charts/index';
 import MetricCard from '../ui/MetricCard';
+import InfoTip from '../ui/InfoTip';
 
 export default function LoadPanel() {
   const { activities } = useData();
@@ -38,14 +39,27 @@ export default function LoadPanel() {
       <div className="grid grid-cols-2 gap-3">
         {latestACWR && acwrStatus && (
           <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 text-center">
-            <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">急慢性负荷比 (ACWR)</div>
+            <div className="flex items-center justify-center gap-1">
+              <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">急慢性负荷比</div>
+              <InfoTip term="ACWR（急慢性负荷比）">
+                ACWR = 近7天总负荷（急性）÷ 近28天周均负荷（慢性）。
+                {'<0.8'} 训练不足；0.8-1.3 最佳区间；1.3-1.5 偏高需注意；{'>1.5'} 过度训练风险。
+                研究表明 ACWR {'>1.5'} 时受伤风险显著增加。
+              </InfoTip>
+            </div>
             <div className="text-3xl font-medium mt-2" style={{ color: acwrStatus.color }}>{latestACWR.ratio.toFixed(2)}</div>
             <div className="text-[0.65rem] mt-1" style={{ color: acwrStatus.color }}>{acwrStatus.label}</div>
-            <div className="text-[0.6rem] text-[#555] mt-1">急性 {latestACWR.acute} · 慢性 {latestACWR.chronic}</div>
+            <div className="text-[0.6rem] text-[#555] mt-1">7天负荷 {latestACWR.acute} · 28天均荷 {latestACWR.chronic}</div>
           </div>
         )}
         <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 text-center">
-          <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">恢复状态</div>
+          <div className="flex items-center justify-center gap-1">
+            <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">恢复状态</div>
+            <InfoTip term="恢复状态">
+              基于近3天训练负荷按时间衰减（当日70%、昨日30%、前日10%）加权计算。
+              剩余负荷越低，身体恢复越充分。建议高强度训练前确保恢复状态 ≥ 80%。
+            </InfoTip>
+          </div>
           <div className="mt-2 h-2 rounded-full bg-white/5 overflow-hidden">
             <div className="h-full rounded-full transition-all duration-700" style={{
               width: `${recovery.score}%`,
@@ -59,7 +73,15 @@ export default function LoadPanel() {
 
       {acwrData.length >= 4 && (
         <MetricCard
-          title="ACWR 周趋势"
+          title={
+            <span className="flex items-center gap-1">
+              ACWR 周趋势
+              <InfoTip term="ACWR 趋势图">
+                展示每周急慢性负荷比的波动。稳定在绿色区间（0.8-1.3）表示训练安排科学合理。
+                持续走高应警惕，突然飙升提示短期内训练量增加过快。
+              </InfoTip>
+            </span>
+          }
           chart={
             <LineChart
               data={acwrData.slice(-16).map(p => ({ x: p.week.slice(5), y: p.ratio }))}
@@ -78,7 +100,16 @@ export default function LoadPanel() {
 
       {intensityZones.length > 0 && intensityZones.some(z => z.count > 0) && (
         <MetricCard
-          title="训练强度分布（跑步）"
+          title={
+            <span className="flex items-center gap-1">
+              训练强度分布（跑步）
+              <InfoTip term="训练强度分布">
+                基于每次跑步配速与个人最佳配速的比值划分区间。
+                轻松跑（{'>75%'}最佳配速）、节奏跑（75%-88%）、间歇跑（88%-97%）、冲刺跑（{'<97%'}）。
+                建议遵循 80/20 原则：80% 低强度 + 20% 中高强度。
+              </InfoTip>
+            </span>
+          }
           chart={
             <PieChart
               data={intensityZones.filter(z => z.count > 0).map(z => ({
