@@ -28,13 +28,16 @@ export function ScatterChart({ data, xLabel, yLabel, color = '#4ade80' }: { data
     xAxis: { type: 'value', name: xLabel, nameTextStyle: { color: '#666', fontSize: 11 }, axisLine: { lineStyle: { color: '#333' } }, axisLabel: { color: '#666', fontSize: 11 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } } },
     yAxis: { type: 'value', name: yLabel, nameTextStyle: { color: '#666', fontSize: 11 }, axisLine: { lineStyle: { color: '#333' } }, axisLabel: { color: '#666', fontSize: 11 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } } },
     series: [{
-      data: data.map(d => [d.x, d.y]), type: 'scatter',
+      data: data.map(d => ({ value: [d.x, d.y], name: d.label ?? '' })), type: 'scatter',
       itemStyle: { color }, symbolSize: 10,
       emphasis: { scale: 1.5 },
     }],
     tooltip: {
       trigger: 'item',
-      formatter: (p: { data: [number, number] }) => `${xLabel}: ${p.data[0]}<br/>${yLabel}: ${p.data[1]}`,
+      formatter: (p: { name: string; value: number[] }) => {
+        const name = p.name ? `<b>${p.name}</b><br/>` : '';
+        return `${name}${xLabel}: ${p.value[0].toFixed(1)}<br/>${yLabel}: ${Math.round(p.value[1])}`;
+      },
     } as unknown,
     backgroundColor: 'transparent',
   };
