@@ -33,15 +33,9 @@ export default function SuggestionPanel() {
     if (goalType && goalValue) setGoalSet(true);
   }, [goalType, goalValue]);
 
-  if (activities.length < 5) {
-    return (
-      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
-        <div className="text-[#666] text-sm">数据不足，至少需要 5 条活动才能提供建议</div>
-      </div>
-    );
-  }
+  const hasData = activities.length >= 5;
 
-  return (
+  return hasData ? (
     <div className="space-y-4">
       <div className={`rounded-2xl border p-5 ${
         status.status === 'improving' ? 'border-green-500/20 bg-green-500/[0.03]' :
@@ -133,6 +127,10 @@ export default function SuggestionPanel() {
           </div>
         </div>
       )}
+    </div>
+  ) : (
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
+      <div className="text-[#666] text-sm">数据不足，至少需要 5 条活动才能提供建议</div>
     </div>
   );
 }

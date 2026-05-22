@@ -31,15 +31,9 @@ export default function LoadPanel() {
   const latestACWR = acwrData.length > 0 ? acwrData[acwrData.length - 1] : null;
   const acwrStatus = latestACWR ? getACWRStatus(latestACWR.ratio) : null;
 
-  if (activities.length < 28) {
-    return (
-      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
-        <div className="text-[#666] text-sm">数据不足，至少需要 28 天活动数据才能分析训练负荷</div>
-      </div>
-    );
-  }
+  const hasData = activities.length >= 28;
 
-  return (
+  return hasData ? (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         {latestACWR && acwrStatus && (
@@ -96,6 +90,10 @@ export default function LoadPanel() {
           }
         />
       )}
+    </div>
+  ) : (
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
+      <div className="text-[#666] text-sm">数据不足，至少需要 28 天活动数据才能分析训练负荷</div>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import TrendTab from './components/tabs/TrendTab';
 import BodyTab from './components/tabs/BodyTab';
 import SleepTab from './components/tabs/SleepTab';
 import ActivitiesTab from './components/tabs/ActivitiesTab';
+import AnalysisTab from './components/tabs/AnalysisTab';
 import ActivityDetail from './components/detail/ActivityDetail';
 import type { ActivitySummary, SportType } from './types/coros';
 
@@ -114,6 +115,7 @@ function AppShell() {
         initialDateTo={activityFilter.dateTo}
         initialSportType={activityFilter.sportType}
       />
+      <AnalysisTab active={showOverlay === 'analysis'} onClose={() => setActiveTab('overview')} />
       <ActivityDetail activity={selectedActivity} onClose={() => setSelectedActivity(null)} />
     </>
   );

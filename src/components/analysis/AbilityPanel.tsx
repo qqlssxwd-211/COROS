@@ -32,15 +32,9 @@ export default function AbilityPanel() {
   const confidenceBadge = vo2maxResult?.confidence === 'high' ? '较可靠' :
     vo2maxResult?.confidence === 'medium' ? '参考值' : '参考值';
 
-  if (activities.length < 3) {
-    return (
-      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
-        <div className="text-[#666] text-sm">数据不足，至少需要 3 条跑步活动才能评估运动能力</div>
-      </div>
-    );
-  }
+  const hasData = activities.length >= 3;
 
-  return (
+  return hasData ? (
     <div className="space-y-4">
       {vo2maxResult && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -92,6 +86,10 @@ export default function AbilityPanel() {
           />
         </div>
       )}
+    </div>
+  ) : (
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
+      <div className="text-[#666] text-sm">数据不足，至少需要 3 条跑步活动才能评估运动能力</div>
     </div>
   );
 }
