@@ -19,3 +19,24 @@ export function LineChart({ data, color = '#4ade80', area = false }: { data: Dat
 }
 
 export { LineChart as AreaChart };
+
+interface ScatterPoint { x: number; y: number; label?: string; }
+
+export function ScatterChart({ data, xLabel, yLabel, color = '#4ade80' }: { data: ScatterPoint[]; xLabel: string; yLabel: string; color?: string }) {
+  const option = {
+    grid: { left: 50, right: 16, top: 16, bottom: 32 },
+    xAxis: { type: 'value', name: xLabel, nameTextStyle: { color: '#666', fontSize: 11 }, axisLine: { lineStyle: { color: '#333' } }, axisLabel: { color: '#666', fontSize: 11 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } } },
+    yAxis: { type: 'value', name: yLabel, nameTextStyle: { color: '#666', fontSize: 11 }, axisLine: { lineStyle: { color: '#333' } }, axisLabel: { color: '#666', fontSize: 11 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } } },
+    series: [{
+      data: data.map(d => [d.x, d.y]), type: 'scatter',
+      itemStyle: { color }, symbolSize: 10,
+      emphasis: { scale: 1.5 },
+    }],
+    tooltip: {
+      trigger: 'item',
+      formatter: (p: { data: [number, number] }) => `${xLabel}: ${p.data[0]}<br/>${yLabel}: ${p.data[1]}`,
+    } as unknown,
+    backgroundColor: 'transparent',
+  };
+  return <ReactEChartsCore option={option} style={{ height: 200 }} theme="dark" />;
+}
