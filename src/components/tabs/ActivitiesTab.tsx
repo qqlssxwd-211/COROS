@@ -9,16 +9,18 @@ import type { ActivitySummary, SportType } from '../../types/coros';
 
 interface Props { active: boolean; onClose: () => void; onSelectActivity: (a: ActivitySummary) => void; }
 
+function fmtDist(m: number) { return (m / 1000).toFixed(2); }
+function fmtDur(s: number) { const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); return h > 0 ? `${h}h${m}min` : `${m}min`; }
+function fmtPace(sec: number) { if (!sec || sec <= 0) return '—'; const min = Math.floor(sec / 60); const s = Math.round(sec % 60); return `${min}'${String(s).padStart(2, '0')}"`; }
+
 export default function ActivitiesTab({ active, onClose, onSelectActivity }: Props) {
   const { activities } = useData();
 
-  // Draft filter state (UI)
   const [sportType, setSportType] = useState<SportType>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [sortBy, setSortBy] = useState('date-desc');
 
-  // Applied filter state
   const [appliedSport, setAppliedSport] = useState<SportType>('all');
   const [appliedFrom, setAppliedFrom] = useState('');
   const [appliedTo, setAppliedTo] = useState('');
@@ -70,14 +72,15 @@ export default function ActivitiesTab({ active, onClose, onSelectActivity }: Pro
       <div className="mt-3">
         <DataTable
           columns={[
-            { key: 'startTime', label: '日期', render: (v) => { const ts = Number(v); return ts > 0 ? new Date(ts * 1000).toISOString().slice(0, 10) : '—'; } },
-            { key: 'sportType', label: '类型', render: (v) => { const s = SPORT_MAP[Number(v)]; return s ? <Badge label={s.name} color={s.color} /> : '—'; } },
+            { key: 'startTime', label: '日期', render: (v) => { const ts = Number(v); return ts > 0 ? new Date(ts * 1000).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) : '—'; } },
+            { key: 'sportType', label: '类型', render: (v) => { const s = SPORT_MAP[Number(v)]; return s ? <Badge label={s.name} color={s.color} /> : <span className="text-[#666]">—</span>; } },
             { key: 'name', label: '名称' },
-            { key: 'totalDistance', label: '距离(km)', render: (v) => (Number(v) / 1000).toFixed(2) },
-            { key: 'totalTime', label: '时长', render: (v) => { const s = Number(v); const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); return h > 0 ? `${h}:${String(m).padStart(2, '0')}:00` : `${m}min`; } },
-            { key: 'avgHeartRate', label: '心率', render: (v) => v ? `${v} bpm` : '—' },
-            { key: 'totalAscent', label: '爬升(m)', render: (v) => v != null ? String(v) : '—' },
-            { key: 'trainingLoad', label: '负荷', render: (v) => v ? Math.round(Number(v)) : '—' },
+            { key: 'totalDistance', label: '距离', render: (v) => <span className="tabular-nums">{fmtDist(Number(v))}<span className="text-[#555] ml-0.5">km</span></span> },
+            { key: 'avgPace', label: '配速', render: (v) => <span className="tabular-nums">{fmtPace(Number(v))}</span> },
+            { key: 'totalTime', label: '时长', render: (v) => fmtDur(Number(v)) },
+            { key: 'avgHeartRate', label: '心率', render: (v) => v ? <span>{String(v)} <span className="text-[#555]">bpm</span></span> : <>—</> },
+            { key: 'totalAscent', label: '爬升', render: (v) => v ? <span>{String(v)}<span className="text-[#555] ml-0.5">m</span></span> : <>—</> },
+            { key: 'trainingLoad', label: '负荷', render: (v) => v ? <>{Math.round(Number(v))}</> : <>—</> },
           ]}
           rows={filtered as unknown as Record<string, unknown>[]}
           onRowClick={(row) => onSelectActivity(row as unknown as ActivitySummary)}

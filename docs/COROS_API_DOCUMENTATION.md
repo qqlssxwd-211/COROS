@@ -158,37 +158,61 @@ yfheader: {"userId":"<用户ID>"}   // 可选，CN 区域建议携带
 | COROS API 字段 | 系统字段 | 类型 | 单位 | 说明 |
 |---------------|---------|------|------|------|
 | `labelId` | `id` | string | — | 活动唯一标识 |
-| `name` | `name` | string | — | 活动名称（可自定义） |
+| `name` | `name` | string | — | 活动名称（用户可自定义） |
+| `date` | — | number | YYYYMMDD | 活动日期 |
 | `sportType` | `sportType` | number | — | 运动类型代码（见 3.4） |
-| `sportName` | `sportName` | string | — | 运动类型名称 |
-| `startTime` | `startTime` | string(Unix秒) | — | 开始时间（Unix 时间戳） |
-| `endTime` | `endTime` | string(Unix秒) | — | 结束时间（Unix 时间戳） |
+| `mode` / `subMode` | `mode` | number | — | 运动子模式 |
+| `startTime` | `startTime` | string(Unix秒) | — | 开始时间 |
+| `endTime` | `endTime` | string(Unix秒) | — | 结束时间 |
 | `totalTime` | `totalTime` | number | 秒 | 总活动时长 |
+| `workoutTime` | `workoutTime` | number | 秒 | 有效运动时长 |
 | `distance` | `totalDistance` | number | 米 | 总距离 |
 | `calorie` | `totalCalories` | number | 千卡 | 总消耗热量 |
 | `avgHr` | `avgHeartRate` | number | bpm | 平均心率 |
-| — | `maxHeartRate` | number | bpm | _暂不可用（固定为 0）_ |
-| — | `avgPace` | number | 秒/公里 | 平均配速（由 `totalTime / (distance/1000)` 计算） |
+| `avgPace` | `avgPace` | number | 秒/公里 | 平均配速（计算值 = totalTime / (distance/1000)） |
 | `ascent` | `totalAscent` | number | 米 | 累计爬升 |
-| `descent` | `descent` | number | 米 | 累计下降 |
-| `avgCadence` | `avgCadence` | number | 步/分钟 | 平均步频 |
-| `avgSpeed` | `avgSpeed` | number | cm/s(×100) | 平均速度（显示时 /100 转为 m/s） |
-| `maxSpeed` | `maxSpeed` | number | cm/s(×100) | 最大速度（显示时 /100 转为 m/s） |
+| `descent` / `totalDescent` | `descent` / `totalDescent` | number | 米 | 累计下降 |
+| `downhillDist` | `downhillDist` | number | 米 | 下坡距离 |
+| `downhillTime` | `downhillTime` | number | 秒 | 下坡时长 |
+| `maxSlope` | `maxSlope` | number | % | 最大坡度 |
+| `avgCadence` | `avgCadence` | number | 步/分钟 | 平均步频/踏频 |
+| `cadence` | `cadence` | number | — | 步频/踏频 |
+| `avgSpeed` | `avgSpeed` | number | m/s | 平均速度（API返回cm/s，前端除100转为m/s） |
+| `maxSpeed` | `maxSpeed` | number | m/s | 最大速度 |
+| `best` | `best` | number | cm/s | 最佳速度 |
+| `bestKm` | `bestKm` | number | — | 最佳公里 |
 | `device` | `device` | string | — | 设备名称 |
+| `deviceId` | — | string | — | 设备序列号 |
 | `step` | `step` | number | 步 | 总步数 |
-| `workoutTime` | `workoutTime` | number | 秒 | 有效运动时长 |
 | `trainingLoad` | `trainingLoad` | number | — | 训练负荷 |
+| `avgPower` | `avgPower` | number | W | 平均功率（骑行） |
+| `np` | `np` | number | W | 标准化功率（骑行） |
+| `avgStrkRate` | `avgStrkRate` | number | 次/分 | 平均划水频率（游泳） |
+| `swolf` | `swolf` | number | — | SWOLF 游泳效率指数 |
+| `lengths` | `lengths` | number | 趟 | 泳池趟数（游泳） |
+| `sets` | `sets` | number | 组 | 训练组数（力量训练） |
+| `totalReps` | `totalReps` | number | 次 | 总次数（力量训练） |
+| `bodyTemperature` | `bodyTemperature` | number | °C | 体温 |
+| `waterTemperature` | `waterTemperature` | number | °C | 水温（API返回x100，前端除100） |
+| `imageUrl` | `imageUrl` | string | URL | 活动路线图（COROS OSS CDN） |
+| `imageUrlType` | — | number | — | 图片类型标识 |
+| `speedType` | — | number | — | 速度类型 |
+| `unitType` | — | number | — | 单位制（2=公制） |
+| `startTimezone` / `endTimezone` | — | number | — | 时区信息 |
 
 ### 3.4 运动类型对照表
 
 | sportType 代码 | 运动名称 | 分类 | 颜色 |
 |---------------|---------|------|------|
 | `100` | 跑步 | `running` | 🟢 `#4ade80` |
+| `101` | 室内跑步 | `running` | 🟢 `#4ade80` |
 | `102` | 越野跑 | `trailRunning` | 🟢 `#22c55e` |
 | `104` | 登山 | `hiking` | 🟡 `#facc15` |
+| `105` | 徒步 | `hiking` | 🟠 `#f59e0b` |
 | `200` | 公路骑行 | `cycling` | 🔵 `#38bdf8` |
 | `201` | 山地骑行 | `cycling` | 🔵 `#38bdf8` |
-| `301` | 游泳 | `swimming` | 🟢 `#34d399` |
+| `301` | 泳池游泳 | `swimming` | 🟢 `#34d399` |
+| `302` | 开放水域 | `swimming` | 🔵 `#06b6d4` |
 | `400` | 力量训练 | `strength` | 🟣 `#c084fc` |
 
 ### 3.5 数据分析 Dashboard `GET /analyse/dashboard`

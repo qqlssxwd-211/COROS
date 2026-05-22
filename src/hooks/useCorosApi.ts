@@ -30,6 +30,11 @@ export function useCorosApi() {
   function mapActivity(raw: any): ActivitySummary {
     const dist = raw.distance ?? 0;
     const time = raw.totalTime ?? 0;
+    const speed = raw.avgSpeed ? Number(raw.avgSpeed) : undefined;
+    // avgSpeed 单位是 cm/s，但有些活动返回的是 m/s*100，统一 /100 转 m/s
+    const speedMs = speed ? (speed > 1000 ? speed / 100 : speed) : undefined;
+    const maxSpd = raw.maxSpeed ? Number(raw.maxSpeed) : undefined;
+    const maxSpeedMs = maxSpd ? (maxSpd > 1000 ? maxSpd / 100 : maxSpd) : undefined;
     return {
       id: raw.labelId ?? '',
       name: raw.name ?? '',
@@ -40,18 +45,37 @@ export function useCorosApi() {
       totalDistance: dist,
       totalCalories: raw.calorie ?? 0,
       avgHeartRate: raw.avgHr ?? 0,
-      maxHeartRate: 0,
+      maxHeartRate: raw.maxHr ?? 0,
       avgPace: dist > 0 && time > 0 ? Math.round(time / (dist / 1000)) : 0,
       totalAscent: raw.ascent ?? 0,
       trainingLoad: raw.trainingLoad ?? 0,
       endTime: raw.endTime ? String(raw.endTime) : undefined,
       descent: raw.descent ?? undefined,
       avgCadence: raw.avgCadence ?? undefined,
-      avgSpeed: raw.avgSpeed ? Number(raw.avgSpeed) : undefined,
-      maxSpeed: raw.maxSpeed ? Number(raw.maxSpeed) : undefined,
+      avgSpeed: speedMs,
+      maxSpeed: maxSpeedMs,
       device: raw.device ?? undefined,
       step: raw.step ?? undefined,
       workoutTime: raw.workoutTime ?? undefined,
+      // New fields
+      imageUrl: raw.imageUrl ?? undefined,
+      maxSlope: raw.maxSlope ?? undefined,
+      bestKm: raw.bestKm ?? undefined,
+      best: raw.best ? Number(raw.best) : undefined,
+      avgPower: raw.avgPower ?? undefined,
+      np: raw.np ?? undefined,
+      avgStrkRate: raw.avgStrkRate ?? undefined,
+      swolf: raw.swolf ?? undefined,
+      lengths: raw.lengths ?? undefined,
+      sets: raw.sets ?? undefined,
+      totalReps: raw.totalReps ?? undefined,
+      downhillDist: raw.downhillDist ?? undefined,
+      downhillTime: raw.downhillTime ?? undefined,
+      totalDescent: raw.totalDescent ?? undefined,
+      bodyTemperature: raw.bodyTemperature ?? undefined,
+      waterTemperature: raw.waterTemperature ? raw.waterTemperature / 100 : undefined,
+      mode: raw.mode ?? undefined,
+      cadence: raw.cadence ?? undefined,
     };
   }
 
@@ -65,7 +89,8 @@ export function useCorosApi() {
       '/activity/query', { size: '100', pageNumber: '1' }
     );
 
-    const activities: ActivitySummary[] = (firstPage.data?.dataList ?? []).map(mapActivity);
+    const rawList = firstPage.data?.dataList ?? [];
+    const activities: ActivitySummary[] = rawList.map(mapActivity);
     const totalCount = firstPage.data?.count ?? 0;
     const totalPages = Math.ceil(totalCount / 100);
 

@@ -37,6 +37,25 @@ export interface ActivitySummary {
   device?: string;
   step?: number;
   workoutTime?: number;
+  // New fields from API analysis
+  imageUrl?: string;       // 活动路线截图 URL（COROS CDN）
+  maxSlope?: number;       // 最大坡度
+  bestKm?: number;         // 最佳公里配速
+  best?: number;           // 最佳速度
+  avgPower?: number;       // 平均功率（骑行）
+  np?: number;             // 标准化功率（骑行）
+  avgStrkRate?: number;    // 平均划水频率（游泳）
+  swolf?: number;          // SWOLF 指数（游泳）
+  lengths?: number;        // 趟数（游泳）
+  sets?: number;           // 组数（力量训练）
+  totalReps?: number;      // 总次数（力量训练）
+  downhillDist?: number;   // 下坡距离
+  downhillTime?: number;   // 下坡时间
+  totalDescent?: number;   // 总下降
+  bodyTemperature?: number; // 体温
+  waterTemperature?: number;// 水温（x100，游泳）
+  mode?: number;            // 运动子模式
+  cadence?: number;         // 步频/踏频
 }
 
 export interface ActivityDetail extends ActivitySummary {

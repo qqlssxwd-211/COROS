@@ -2,11 +2,14 @@ import type { Region, SportType } from '../types/coros';
 
 export const SPORT_MAP: Record<number, { name: string; type: SportType; color: string }> = {
   100: { name: '跑步', type: 'running', color: '#4ade80' },
+  101: { name: '室内跑步', type: 'running', color: '#4ade80' },
   102: { name: '越野跑', type: 'trailRunning', color: '#22c55e' },
   104: { name: '登山', type: 'hiking', color: '#facc15' },
+  105: { name: '徒步', type: 'hiking', color: '#f59e0b' },
   200: { name: '公路骑行', type: 'cycling', color: '#38bdf8' },
   201: { name: '山地骑行', type: 'cycling', color: '#38bdf8' },
-  301: { name: '游泳', type: 'swimming', color: '#34d399' },
+  301: { name: '泳池游泳', type: 'swimming', color: '#34d399' },
+  302: { name: '开放水域', type: 'swimming', color: '#06b6d4' },
   400: { name: '力量训练', type: 'strength', color: '#c084fc' },
 };
 
