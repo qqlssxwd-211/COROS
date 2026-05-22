@@ -44,21 +44,7 @@ function AppShell() {
     return { calories, steps };
   }, [activities]);
 
-  if (!isLoggedIn) return <LoginOverlay />;
-
-  const showOverlay = selectedActivity
-    ? 'detail'
-    : activeTab === 'overview' ? '' : activeTab;
-
   const todayStr = new Date().toISOString().slice(0, 10);
-
-  const stats = [
-    { label: '2026 活动', value: String(summary.totalActivities), unit: '次', action: 'tab:activities' },
-    { label: '总距离', value: (summary.totalDistance / 1000).toFixed(0), unit: 'km', action: 'sort:distance-desc' },
-    { label: '总时长', value: String(Math.floor(summary.totalDuration / 3600)), unit: 'h', action: 'sort:duration-desc' },
-    { label: '今日消耗', value: todayStats.calories > 0 ? String(todayStats.calories) : '—', unit: 'kcal', action: 'today' },
-    { label: '今日步数', value: todayStats.steps > 0 ? String(todayStats.steps) : '—', unit: '步', action: 'today' },
-  ];
 
   const handleStatClick = useCallback((action: string) => {
     setSelectedActivity(null);
@@ -73,6 +59,20 @@ function AppShell() {
       setActivityFilter({ dateFrom: todayStr, dateTo: todayStr });
     }
   }, [todayStr]);
+
+  if (!isLoggedIn) return <LoginOverlay />;
+
+  const showOverlay = selectedActivity
+    ? 'detail'
+    : activeTab === 'overview' ? '' : activeTab;
+
+  const stats = [
+    { label: '2026 活动', value: String(summary.totalActivities), unit: '次', action: 'tab:activities' },
+    { label: '总距离', value: (summary.totalDistance / 1000).toFixed(0), unit: 'km', action: 'sort:distance-desc' },
+    { label: '总时长', value: String(Math.floor(summary.totalDuration / 3600)), unit: 'h', action: 'sort:duration-desc' },
+    { label: '今日消耗', value: todayStats.calories > 0 ? String(todayStats.calories) : '—', unit: 'kcal', action: 'today' },
+    { label: '今日步数', value: todayStats.steps > 0 ? String(todayStats.steps) : '—', unit: '步', action: 'today' },
+  ];
 
   return (
     <>
