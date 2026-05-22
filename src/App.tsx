@@ -66,7 +66,7 @@ function AppShell() {
           </div>
 
           {/* Mobile layout */}
-          <div className="md:hidden fixed top-14 left-0 right-0 bottom-0 z-20 flex flex-col pointer-events-none">
+          <div className="md:hidden fixed top-24 left-0 right-0 bottom-0 z-20 flex flex-col pointer-events-none">
             <div className="pointer-events-auto px-4 pt-1.5">
               <Hero year={2026} startMonth="1" endMonth="5" mobile />
             </div>
