@@ -7,24 +7,32 @@ import Badge from '../ui/Badge';
 import { SPORT_MAP } from '../../lib/constants';
 import type { ActivitySummary, SportType } from '../../types/coros';
 
-interface Props { active: boolean; onClose: () => void; onSelectActivity: (a: ActivitySummary) => void; }
+interface Props {
+  active: boolean;
+  onClose: () => void;
+  onSelectActivity: (a: ActivitySummary) => void;
+  initialSortBy?: string;
+  initialDateFrom?: string;
+  initialDateTo?: string;
+  initialSportType?: SportType;
+}
 
 function fmtDist(m: number) { return (m / 1000).toFixed(2); }
 function fmtDur(s: number) { const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); return h > 0 ? `${h}h${m}min` : `${m}min`; }
 function fmtPace(sec: number) { if (!sec || sec <= 0) return '—'; const min = Math.floor(sec / 60); const s = Math.round(sec % 60); return `${min}'${String(s).padStart(2, '0')}"`; }
 
-export default function ActivitiesTab({ active, onClose, onSelectActivity }: Props) {
+export default function ActivitiesTab({ active, onClose, onSelectActivity, initialSortBy, initialDateFrom, initialDateTo, initialSportType }: Props) {
   const { activities } = useData();
 
-  const [sportType, setSportType] = useState<SportType>('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [sortBy, setSortBy] = useState('date-desc');
+  const [sportType, setSportType] = useState<SportType>(initialSportType ?? 'all');
+  const [dateFrom, setDateFrom] = useState(initialDateFrom ?? '');
+  const [dateTo, setDateTo] = useState(initialDateTo ?? '');
+  const [sortBy, setSortBy] = useState(initialSortBy ?? 'date-desc');
 
-  const [appliedSport, setAppliedSport] = useState<SportType>('all');
-  const [appliedFrom, setAppliedFrom] = useState('');
-  const [appliedTo, setAppliedTo] = useState('');
-  const [appliedSort, setAppliedSort] = useState('date-desc');
+  const [appliedSport, setAppliedSport] = useState<SportType>(initialSportType ?? 'all');
+  const [appliedFrom, setAppliedFrom] = useState(initialDateFrom ?? '');
+  const [appliedTo, setAppliedTo] = useState(initialDateTo ?? '');
+  const [appliedSort, setAppliedSort] = useState(initialSortBy ?? 'date-desc');
 
   const handleSearch = useCallback(() => {
     setAppliedSport(sportType);
