@@ -21,7 +21,7 @@ export default function InfoTip({ term, children }: Props) {
   return (
     <span ref={ref} className="relative inline-flex items-center">
       <i
-        className="fa fa-info-circle text-[0.55rem] text-[#555] hover:text-[#999] cursor-pointer ml-1"
+        className="fa fa-info-circle text-[0.58rem] text-[#777] hover:text-[#bbb] cursor-pointer ml-1"
         onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
       />
       <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 w-60 p-3 rounded-xl border border-white/10 bg-[#1e1e1e] shadow-2xl z-50 transition-all duration-150 ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>

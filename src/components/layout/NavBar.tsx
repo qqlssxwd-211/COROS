@@ -39,7 +39,7 @@ const ActionBtns = ({ mapRef, onSync, syncLoading, syncError, userName, logout }
 }) => (
   <div className="flex items-center gap-1.5 md:gap-3">
     <button onClick={() => mapRef.current?.resetView()}
-      className="rounded-3xl bg-white/10 px-3 md:px-5 py-1.5 md:py-2 text-[0.7rem] md:text-[0.82rem] font-semibold text-[#fafafa] transition hover:bg-white/15 whitespace-nowrap">
+      className="rounded-3xl bg-accent px-3 md:px-5 py-1.5 md:py-2 text-[0.7rem] md:text-[0.82rem] font-semibold text-black transition hover:bg-accent-hover whitespace-nowrap">
       <span className="hidden md:inline">轨迹视角</span>
       <span className="md:hidden">轨迹</span>
     </button>
@@ -47,7 +47,7 @@ const ActionBtns = ({ mapRef, onSync, syncLoading, syncError, userName, logout }
       className="rounded-3xl bg-accent px-3 md:px-5 py-1.5 md:py-2 text-[0.7rem] md:text-[0.82rem] font-semibold text-black transition hover:bg-accent-hover disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black whitespace-nowrap">
       {syncLoading ? '同步中' : syncError ? '重试' : '同步数据'}
     </button>
-    <span className="hidden md:block rounded-[20px] border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.92)] px-3.5 py-1.5 text-[0.78rem] text-[#999] backdrop-blur-md">
+    <span className="rounded-[20px] border border-[rgba(255,255,255,0.06)] bg-[rgba(10,10,10,0.92)] px-2.5 md:px-3.5 py-1 md:py-1.5 text-[0.68rem] md:text-[0.78rem] text-[#bbb] backdrop-blur-md max-w-[80px] md:max-w-none truncate">
       {userName}
     </span>
     <button onClick={logout} className="text-[0.68rem] md:text-[0.72rem] text-[#666] hover:text-[#999] whitespace-nowrap">退出</button>

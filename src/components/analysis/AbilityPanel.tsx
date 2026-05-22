@@ -54,7 +54,7 @@ export default function AbilityPanel() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">估算 VO2max</div>
+              <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#999]">估算 VO2max</div>
               <InfoTip term="VO2max（最大摄氧量）">
                 指人体在高强度运动中每分钟每公斤体重能摄入的最大氧气量，是衡量有氧耐力的核心指标。
                 基于 Jack Daniels VDOT 公式，根据最佳跑步配速估算得出。
@@ -62,7 +62,7 @@ export default function AbilityPanel() {
               </InfoTip>
             </div>
             <div className="text-4xl font-medium text-[#fafafa] tracking-[-0.03em] mt-2">{vo2maxResult.vo2max}</div>
-            <div className="text-[0.65rem] text-[#666] mt-1">
+            <div className="text-[0.65rem] text-[#999] mt-1">
               等级：{vo2maxLevel(vo2maxResult.vo2max)}
               <span className="mx-1.5">·</span>
               基于 {vo2maxResult.sampleCount} 条记录
@@ -74,7 +74,7 @@ export default function AbilityPanel() {
 
           <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
             <div className="flex items-center justify-center gap-1 mb-3">
-              <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">成绩预测</div>
+              <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#999]">成绩预测</div>
               <InfoTip term="成绩预测">
                 基于当前 VO2max 和 Jack Daniels VDOT 跑力表推算各距离完赛时间。
                 随训练适应调整，配速会根据不同距离自动修正。仅供参考，实际成绩受天气、地形、状态等因素影响。
@@ -83,9 +83,9 @@ export default function AbilityPanel() {
             <div className="grid grid-cols-5 gap-1 text-center">
               {raceTimes.map(r => (
                 <div key={r.label}>
-                  <div className="text-[0.6rem] text-[#666]">{r.label}</div>
+                  <div className="text-[0.6rem] text-[#999]">{r.label}</div>
                   <div className="text-[0.82rem] font-medium text-[#fafafa] tabular-nums">{fmtTime(r.time)}</div>
-                  <div className="text-[0.58rem] text-[#555]">{fmtPace(r.pace)}/km</div>
+                  <div className="text-[0.58rem] text-[#888]">{fmtPace(r.pace)}/km</div>
                 </div>
               ))}
             </div>
@@ -128,7 +128,7 @@ export default function AbilityPanel() {
     </div>
   ) : (
     <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
-      <div className="text-[#666] text-sm">数据不足，至少需要 3 条跑步活动才能评估运动能力</div>
+      <div className="text-[#999] text-sm">数据不足，至少需要 3 条跑步活动才能评估运动能力</div>
     </div>
   );
 }

@@ -40,7 +40,7 @@ export default function LoadPanel() {
         {latestACWR && acwrStatus && (
           <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 text-center">
             <div className="flex items-center justify-center gap-1">
-              <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">急慢性负荷比</div>
+              <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#999]">急慢性负荷比</div>
               <InfoTip term="ACWR（急慢性负荷比）">
                 ACWR = 近7天总负荷（急性）÷ 近28天周均负荷（慢性）。
                 {'<0.8'} 训练不足；0.8-1.3 最佳区间；1.3-1.5 偏高需注意；{'>1.5'} 过度训练风险。
@@ -49,12 +49,12 @@ export default function LoadPanel() {
             </div>
             <div className="text-3xl font-medium mt-2" style={{ color: acwrStatus.color }}>{latestACWR.ratio.toFixed(2)}</div>
             <div className="text-[0.65rem] mt-1" style={{ color: acwrStatus.color }}>{acwrStatus.label}</div>
-            <div className="text-[0.6rem] text-[#555] mt-1">7天负荷 {latestACWR.acute} · 28天均荷 {latestACWR.chronic}</div>
+            <div className="text-[0.6rem] text-[#888] mt-1">7天负荷 {latestACWR.acute} · 28天均荷 {latestACWR.chronic}</div>
           </div>
         )}
         <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 text-center">
           <div className="flex items-center justify-center gap-1">
-            <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#666]">恢复状态</div>
+            <div className="text-[0.62rem] uppercase tracking-[0.05em] text-[#999]">恢复状态</div>
             <InfoTip term="恢复状态">
               基于近3天训练负荷按时间衰减（当日70%、昨日30%、前日10%）加权计算。
               剩余负荷越低，身体恢复越充分。建议高强度训练前确保恢复状态 ≥ 80%。
@@ -67,7 +67,7 @@ export default function LoadPanel() {
             }} />
           </div>
           <div className="text-xl font-medium mt-1.5" style={{ color: recovery.color }}>{recovery.label}</div>
-          <div className="text-[0.6rem] text-[#555]">剩余负荷 {recovery.remainingFatigue}</div>
+          <div className="text-[0.6rem] text-[#888]">剩余负荷 {recovery.remainingFatigue}</div>
         </div>
       </div>
 
@@ -124,7 +124,7 @@ export default function LoadPanel() {
     </div>
   ) : (
     <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center">
-      <div className="text-[#666] text-sm">数据不足，至少需要 28 天活动数据才能分析训练负荷</div>
+      <div className="text-[#999] text-sm">数据不足，至少需要 28 天活动数据才能分析训练负荷</div>
     </div>
   );
 }
